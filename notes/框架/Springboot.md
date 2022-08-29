@@ -27,6 +27,8 @@ Java SPI就是提供这样的一个机制：为某个接口寻找服务实现的
 
 #### SPI其他待补充
 
+和dubbo spi的区别
+
 #### 如何实现自动装配
 
 SpringBoot 的核心注解 @SpringBootApplication
@@ -39,4 +41,82 @@ SpringBoot 的核心注解 @SpringBootApplication
 
 ##### @EnableAutoConfiguration
 
-@EnableAutoConfiguration只是一个简单地注解，自动装配核心功能的实现实际是通过AutoConfigurationImportSelector类。
+@EnableAutoConfiguration只是一个简单地注解，自动装配核心功能的实现实际是通过**AutoConfigurationImportSelector**类。
+
+##### AutoConfigurationImportSelector加载自动装配类
+
+```java
+public class AutoConfigurationImportSelector implements DeferredImportSelector, BeanClassLoaderAware, ResourceLoaderAware, BeanFactoryAware, EnvironmentAware, Ordered {
+
+}
+
+public interface DeferredImportSelector extends ImportSelector {
+
+}
+
+public interface ImportSelector {
+    String[] selectImports(AnnotationMetadata var1);
+}
+```
+
+AutoConfigurationImportSelector 类实现了 ImportSelector接口，也就实现了这个接口中的
+selectImports方法，该方法主要用于**获取所有符合条件的类的全限定类名，这些类需要被加载到 IoC 容器中**。
+
+```java
+public class AutoConfigurationImportSelector implements DeferredImportSelector, BeanClassLoaderAware, ResourceLoaderAware, BeanFactoryAware, EnvironmentAware, Ordered {
+    public String[] selectImports(AnnotationMetadata annotationMetadata) {
+        if (!this.isEnabled(annotationMetadata)) {
+            // <1>.判断自动装配开关是否打开
+            return NO_IMPORTS;
+        } else {
+            //<2>.获取所有需要装配的bean
+            AutoConfigurationEntry autoConfigurationEntry = this.getAutoConfigurationEntry(annotationMetadata);
+            return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
+        }
+    }
+
+    protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
+        if (!isEnabled(annotationMetadata)) {
+            return EMPTY_ENTRY;
+        }
+//      获取@EnableAutoConfiguration注解属性 exclude 和 excludeName
+        AnnotationAttributes attributes = getAttributes(annotationMetadata);
+//      获取需要自动装配的所有配置类，读取META-INF/spring.factories
+        List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+//      移除重复的依赖
+        configurations = removeDuplicates(configurations);
+        Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+        checkExcludedClasses(configurations, exclusions);
+//      移除全部@EnableAutoConfiguration注解属性 exclude 和 excludeName的设置的依赖      
+        configurations.removeAll(exclusions);
+//      过滤没有全部满足@ConditionalOnXX 中的所有条件的类。      
+        configurations = getConfigurationClassFilter().filter(configurations);
+        fireAutoConfigurationImportEvents(configurations, exclusions);
+        return new AutoConfigurationEntry(configurations, exclusions);
+    }
+}
+```
+
+**XXXAutoConfiguration的作用就是按需加载组件**
+不光是当前依赖下的META-INF/spring.factories被读取到，**所有Spring Boot Starter下的META-INF/spring.factories都会被读取到**
+
+定义bean满足的条件的注解
+
+- @ConditionalOnBean：当容器里有指定 Bean 的条件下
+- @ConditionalOnMissingBean：当容器里没有指定 Bean 的情况下
+- @ConditionalOnSingleCandidate：当指定 Bean 在容器中只有一个，或者虽然有多个但是指定首选 Bean
+- @ConditionalOnClass：当类路径下有指定类的条件下
+- @ConditionalOnMissingClass：当类路径下没有指定类的条件下
+- @ConditionalOnProperty：指定的属性是否有指定的值
+- @ConditionalOnResource：类路径是否有指定的值
+- @ConditionalOnExpression：基于 SpEL 表达式作为判断条件
+- @ConditionalOnJava：基于 Java 版本作为判断条件
+- @ConditionalOnJndi：在 JNDI 存在的条件下差在指定的位置
+- @ConditionalOnNotWebApplication：当前项目不是 Web 项目的条件下
+- @ConditionalOnWebApplication：当前项目是 Web 项 目的条件下
+
+
+
+
+
+
