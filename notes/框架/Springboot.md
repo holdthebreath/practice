@@ -21,7 +21,9 @@ SpringBoot。**
 #### Java中SPI机制
 
 SPI全称Service Provider Interface，是Java提供的一套用来被第三方实现或者扩展的API，它可以用来启用框架扩展和替换组件。
+
 ![](https://raw.githubusercontent.com/holdthebreath/picture-bed/master/202208241656565.png)
+
 Java SPI 实际上是“基于接口的编程＋策略模式＋配置文件”组合实现的动态加载机制。
 Java SPI就是提供这样的一个机制：为某个接口寻找服务实现的机制。有点类似IOC的思想，就是将装配的控制权移到程序之外，在模块化设计中这个机制尤其重要。所以SPI的核心思想就是解耦。
 
