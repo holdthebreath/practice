@@ -51,4 +51,22 @@ but if the operations are concurrent, we have a conflict that needs to be resolv
 Kleppmann, Martin. Designing Data-Intensive Applications (p. 296). O'Reilly Media. Kindle Edition. 
 ```
 
+### 分布式思维
 
+现在越来越觉得分布式系统太有意思也太有挑战了。其中我觉得很重要的一点就是"分布式"思维。
+比如常用的consumer-provider模型，那某一个节点挂掉，这种都比较好理解。
+但真的到了分布式数据库，思想的转变或者说开阔还挺有挑战的。
+从数据库基础的编解码格式需要实现向前兼容/向后兼容开始，对我来说就理解了一段时间。
+接着走入分布式的大门第一章，备份。
+从这里开始，单主节点，主从同步这些有点概念还可以（mysql/zookeeper选举），多数据中心，相关的感觉也还行。
+然后到了这个无主节点的集群，一开始感觉还可以，无主相比较有主的优（不需要故障转移）劣（写冲突），直到到了并发导致写冲突开始，
+就开始变得越来越有趣了。
+并发写冲突检测这小节一共才15页，但光里面的happen-before算法就理解了好长一段时间。
+接着到了最后一小部分内容，版本向量（Version vectors），这部分很短。
+但我光看原文已经不明白**The collection of version numbers from all the replicas is called a version vector**这是个什么样的数据结构。
+甚至我下意识的以为类似是版本号+前缀，前缀指定节点的那种形式，但是我看了后面感觉不太对劲，又返回来看，还是没这个概念，而且仔细想了一下，如果请求处理都需要
+根据前缀匹配特定节点，那不是就失去了无主集群的优势了吗？（万一前缀的那个节点挂了呢？）
+那么为什么我说分布式思维还需要锻炼呢？
+原文**The version vector structure ensures that it is safe to read from one replica and subsequently write back to another replica.**
+我看懂这句话但一时间根本不明白为什么版本向量可以保证从一个副本读另一副本写是安全的。
+我下意识的还停留在"备份"这个字面意思上，备份只是备份，不会有任何写功能。
