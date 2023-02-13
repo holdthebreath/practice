@@ -39,7 +39,7 @@ JMM把内存屏障指令分为4类
 
 #### happens-before
 
-从JDK5开始，Java使用新的JSR133内存模型，JSR133使用happens-before的概念来阐述操作之间的内存可见性。在JMM中，如果一个操作执行的结果需要对另一个操作可见，那么这两个操作之间必须要存在happensbefore关系。这里提到的
+从JDK5开始，Java使用新的JSR133内存模型，JSR133使用happens-before的概念来阐述操作之间的内存可见性。在JMM中，如果一个操作执行的结果需要对另一个操作可见，那么这两个操作之间必须要存在happens-before关系，
 **两个操作既可以是在一个线程之内，也可以是在不同线程之间**。
 
 happens-before规则：
@@ -49,12 +49,30 @@ happens-before规则：
 3. volatile变量规则：对一个volatile域的写，happens-before于任意后续对这个volatile域的读。
 4. 传递性：如果A happens-before B，且B happens-before C，那么A happens-before C。
 
-**两个操作之间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行！happens-before仅仅要求前一个操作（执行的结果）对后一个操作可见，且前一个操作按顺序排在第二个操作之前（the
-first is visible to and ordered before the second）。**
+**两个操作之间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行！happens-before仅仅要求前一个操作（执行的结果）对后一个操作可见，且前一个操作按顺序排在第二个操作之前
+（the first is visible to and ordered before the second）。**
 
 ![](https://raw.githubusercontent.com/holdthebreath/picture-bed/master/202302131239500.png)
 
+#### as-if-serial语义
 
+as-if-serial语义：不管怎么重排序（编译器和处理器为了提高并行度），**（单线程）程序**
+的执行结果不能被改变。编译器、runtime和处理器都必须遵守as-if-serial语义。
 
+为了遵守as-if-serial语义，编译器和处理器**不会对存在数据依赖关系的操作做重排序**
+，因为这种重排序会改变执行结果。但是，如果操作之间不存在数据依赖关系，这些操作就可能被编译器和处理器重排序。
+as-if-serial语义把单线程程序保护了起来，遵守as-if-serial语义的编译器、runtime和处理器共同为编写单线程程序的程序员创建了一个
+**幻觉：单线程程序是按程序的顺序来执行的**。as-if-serial语义使单线程程序员无需担心重排序会干扰他们，也无需担心内存可见性问题。
 
+### 对并发重排序的理解
+
+首先针对共享变量而言，各个cpu有自己的缓冲区，只有最终实现写内存中的变量之后该"写"
+才会被其他cpu可见。根据背景，数据通过总线实现一系列步骤（总线事务）在cpu和内存中传递，而总线会同步试图并发使用总线的事务，把所有cpu对内存的访问以串行化的方式执行。
+因此我认为多线程并发本质上是每个线程各自遵守"as-if-serial"
+重排序，但由于cpu最终操作内存时还是串行的，因此没有正确同步的程序最终串行执行总的总线事务时由于重排序改变了程序语义，使结果不具有顺序一致性（即程序的执行结果与该程序在顺序一致性内存模型中的执行结果相同）。
+
+顺序一致性内存模型
+
+1. 一个线程中的所有操作必须按照程序的顺序来执行。
+2. （不管程序是否同步）所有线程都只能看到一个单一的操作执行顺序。在顺序一致性内存模型中，每个操作都必须原子执行且立刻对所有线程可见。
 
