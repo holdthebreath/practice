@@ -43,9 +43,13 @@ Kleppmann, Martin. Designing Data-Intensive Applications (p. 354). O'Reilly Medi
 
 ### Durability
 
-```markdown
+ ```markdown 
 Durability is the promise that once a transaction has committed successfully, any data it has written will not be
 forgotten, even if there is a hardware fault or the database crashes.
 
-Kleppmann, Martin. Designing Data-Intensive Applications (p. 355). O'Reilly Media. Kindle Edition. 
+Kleppmann, Martin. Designing Data-Intensive Applications (p. 355). O'Reilly Media. Kindle Edition.
 ```
+
+### ACID的"触类旁通"
+算法导论里说的循环不变式
+
