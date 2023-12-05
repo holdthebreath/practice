@@ -151,6 +151,6 @@ static final class NonfairSync extends Sync {
 方腾飞,魏鹏,程晓明. Java并发编程的艺术 (Java核心技术系列) (Chinese Edition) (pp. 120-121). 机械工业出版社. Kindle Edition. 
 ```
 
-
+正是完美灵活的运用volatile，尽可能的节约性能（比如简单粗暴的把exclusiveOwnerThread也声明成volatile），才构建出了AQS这么精妙的框架。这也是我理解为什么volatile是JUC体系的基石。
 
 
