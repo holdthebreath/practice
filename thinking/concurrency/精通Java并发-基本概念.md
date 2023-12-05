@@ -1,3 +1,7 @@
+```text
+问世间并发为何物，直教人面试狂问
+```
+
 ### 并发为什么存在？
 
 早期的计算机不包括操作系统，从头到位只执行一个程序，并且这个程序能访问计算机所有资源，编写/运行程序困难，资源有点浪费。
@@ -42,4 +46,5 @@ A race condition occurs when the correctness of a computation depends on the rel
 
 Tim, Peierls; Goetz Brian; Bloch Joshua; Bowbeer Joseph; Lea Doug; Holmes David (2006-05-08T22:58:59.000). Java Concurrency in Practice . Pearson Education. Kindle Edition. 
 ```
+
 正确的结果取决于运气。
