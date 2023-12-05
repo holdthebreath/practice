@@ -1,4 +1,4 @@
-# 并发为什么存在？
+### 并发为什么存在？
 
 早期的计算机不包括操作系统，从头到位只执行一个程序，并且这个程序能访问计算机所有资源，编写/运行程序困难，资源有点浪费。
 加入操作系统为了解决：
@@ -11,14 +11,35 @@
 而线程的优势有很多，也许对我们而言，最直观的是发挥多核cpu的性能（同一时刻每个cpu核只能运行一个线程（忽略超线程技术）），这会直接带来性能的提升
 比如:
 maven命令用-T参数指定线程数
+
 ```shell
 mvn clean package -T 1C
 ```
-# 学习理解并发的意义
+
+### 学习理解并发的意义
+
 1. 面试
 2. 实际工作中，比如进行慢接口优化，性能调优等
 
 这看起来像是废话，但就我个人而言，理解学习理解并发是迈向巩固底层的窗口，从Java语言中走出来。
 所以首先我们需要先开始从学习理解Java的并发体系开始。
 
+### 线程安全
 
+关于什么是线程安全，《并发编程艺术》说符合**顺序一致性模型**，但我更多的参考《并发实战》。
+线程安全性中最重要的性质是**正确性，即某个类的行为与其规范完全一致**。简而言之，将**单线程的正确性近似定义为“所见即所知”**。
+综合两个概念，**线程安全性：当多个线程访问某个类时，这个类始终都能表现出正确的行为**（不违背类的不变性条件和后验条件）
+
+根据我目前的理解不变性是CS中很重要的一个概念
+
+1. 算法中通过不变性校验某个算法的正确性
+2. 分布式系统中通过不变性构建分布式理论
+
+### 竞态条件
+
+```text
+A race condition occurs when the correctness of a computation depends on the relative timing or interleaving of multiple threads by the runtime;
+
+Tim, Peierls; Goetz Brian; Bloch Joshua; Bowbeer Joseph; Lea Doug; Holmes David (2006-05-08T22:58:59.000). Java Concurrency in Practice . Pearson Education. Kindle Edition. 
+```
+正确的结果取决于运气。
