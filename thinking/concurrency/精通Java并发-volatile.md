@@ -78,7 +78,7 @@ Object=new Object();
 3. 将对象分配给变量
 
 当然这个顺序是我们**符合直觉**的想法（as-if-serial），实际的执行过程中由于重排序的存在，而步骤2/3之间不存在**数据依赖性**
-，因此是可以进行重排序的。而普通的判断对象是初始化完成是通过”变量是否为null“，所以假设先完成3（写入变量），在完成2之前被另一个线程执行判断（读取变量），这期间会导致单例对象
+，因此是可以进行重排序的。而普通的判断对象是否初始化完成是通过判断”变量是否为null“，所以假设先完成3（写入变量），在完成2之前被另一个线程执行判断（读取变量），这期间会导致单例对象
 **逃逸**，被不正确的发布，即读取的那个线程拿到了没有完全完成初始化的对象。
 那么加上volatile呢？
 
@@ -137,7 +137,7 @@ static final class NonfairSync extends Sync {
 
 可以看到，exclusiveOwnerThread这个属性是没有volatile修饰的，而AQS作为并发框架，很显然是会被并发访问的，那么是如何保证这个值的可见性的呢？
 答案让我们从ReentrantLock里阅读。
-可以看到，在tryRelease()中，针对state变量的写入是最后进行的（写入exclusiveOwnerThread在次之前），而在tryAcquire()
+可以看到，在tryRelease()中，针对state变量的写入是最后进行的（写入exclusiveOwnerThread在此之前），而在tryAcquire()
 中，却是首先读取state变量。如果对volatile内存语义不够了解，可能会有点不明白为什么要强调这两个顺序。我们来用volatile语义推导一下
 假设在tryRelease先写入volatile变量后写入普通变量（exclusiveOwnerThread），那么会导致，设置exclusiveOwnerThread这个操作被安排在写入state之后，
 而可以与读取volatile变量之前的任意操作进行指令重排序，就会存在另一个线程B在线程A执行tryRelease中释放了state后还能看到exclusiveOwnerThread这个值是线程A的情况，
