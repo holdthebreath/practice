@@ -51,6 +51,28 @@ JLS 17.4.1
 3. 第3句描述了哪些变量不会跨线程共享因此不受JMM影响（本地变量，方法形参，异常处理程序参数）。
 4. 第4句定义什么叫（操作）冲突（针对同一个共享变量的两次访问，且其中至少有一次是写操作）。
 
+# 线程间操作(inter-thread)
+```text
+An inter-thread action is an action performed by one thread that can be detected or directly influenced by another thread
+```
+定义：如果一个线程执行的操作可以**被其他线程监测到(be detected)或者被(其他线程)直接影响(directly influenced by)**，那么这个操作叫线程间操作。注意与线程内操作(Intra-thread)英文的区分！
+```markdown
+There are several kinds of inter-thread action that a program may perform:
+1. Read (normal, or non-volatile). Reading a variable.
+2. Write (normal, or non-volatile). Writing a variable.
+3. Synchronization actions, which are:
+   - Volatile read. A volatile read of a variable.
+   - Volatile write. A volatile write of a variable. 
+   - Lock. Locking a monitor
+   - Unlock. Unlocking a monitor.
+   - The (synthetic) first and last action of a thread.
+   - Actions that start a thread or detect that a thread has terminated (§17.4.4).
+4. External Actions. An external action is an action that may be observable outside of an execution, and has a result based on an environment external to the execution.
+5. Thread divergence actions (§17.4.9). A thread divergence action is only performed by a thread that is in an infinite loop in which no memory, synchronization, or external actions are performed. If a thread performs a thread divergence action, it will be followed by an infinite number of thread divergence actions.
+   - Thread divergence actions are introduced to model how a thread may cause all other threads to stall and fail to make progress.
+```
+这里列举了程序具有的多种线程间操作。
+
 
 ```text
 If a program has no data races, then all executions of the program will appear to be sequentially consistent.
