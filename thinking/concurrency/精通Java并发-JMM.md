@@ -21,6 +21,23 @@ JLS 17.4
    - 个人理解：稍微有点拗口，简单理解为，核心校验每次读取值的合法性（比如读一个正确同步的共享变量，但读取到的值不是“最新”写入的，那么则是非法的），
    所以反过来理解，没有正确同步的共享变量，有可见性问题是完全合法的（法无禁即自由？）
 
+```text
+1. The memory model determines what values can be read at every point in the program. 
+2. The actions of each thread in isolation must behave as governed by the semantics of that thread, with the exception that the values seen by each read are determined by the memory model.
+When we refer to this, we say that the program obeys intra-thread semantics.
+3. Intra-thread semantics are the semantics for single-threaded programs, and allow the complete prediction of the behavior of a thread based on the values seen by read actions within the thread. 
+To determine if the actions of thread t in an execution are legal, we simply evaluate the implementation of thread t as it would be performed in a single-threaded context, as defined in the rest of this specification.
+4. Each time the evaluation of thread t generates an inter-thread action, it must match the inter-thread action a of t that comes next in program order. 
+If a is a read, then further evaluation of t uses the value seen by a as determined by the memory model.
+```
+1. 第1句，**内存模型确认程序在任意时间点可以读取到哪些值**（内存模型的最准确的使用描述）。
+2. 第2句说明如果每个线程隔离的操作由当前线程的语义进行约束（读取的值由JMM控制除外），则程序遵守**线程内语义**。（每个程序当然遵守这一点，否则程序的结果完全无法预测）
+3. 第3句说明什么是**线程内语义——就像（以当前线程为）单线程程序进行运行，并且可以通过线程内读取操作所看见的值完全预测线程的行为**，
+以及如何评估一个线程执行的操作是否合法（通过假设当前线程在单线程上下文中执行操作）。
+4. 第4句，每个线程内部生成的**线程间操作**必须(must)符合(match)程序顺序(program order)，如果该操作是一个读取动作，则这个操作具体看到的值由JMM模型确定。
+
+这段话言简意赅，是JMM整体的要义核心。明确了JMM的抽象逻辑结构（堆内存共享），职责范围（只影响堆内存内的变量），触发时机（当出现线程间的读取操作时），以及**单线程的线程间操作具有程序顺序性**。
+
 # 共享变量
 JLS 17.4.1
 ```text
@@ -32,7 +49,7 @@ JLS 17.4.1
 1. 第1句描述了堆内存的定义——跨线程共享的内存。
 2. 第2句描述了哪些变量在堆内存中存储（实例属性，静态属性，数组元素）。
 3. 第3句描述了哪些变量不会跨线程共享因此不受JMM影响（本地变量，方法形参，异常处理程序参数）。
-4. 第4句是这段的核心，什么叫冲突（针对同一个共享变量的两次访问，且其中至少有一次是写操作）。
+4. 第4句定义什么叫（操作）冲突（针对同一个共享变量的两次访问，且其中至少有一次是写操作）。
 
 
 ```text
