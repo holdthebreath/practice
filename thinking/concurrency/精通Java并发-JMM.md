@@ -32,7 +32,7 @@ If a is a read, then further evaluation of t uses the value seen by a as determi
 ```
 1. 第1句，**内存模型确认程序在任意时间点可以读取到哪些值**（内存模型的最准确的使用描述）。
 2. 第2句说明如果每个线程隔离的操作由当前线程的语义进行约束（读取的值由JMM控制除外），则程序遵守**线程内语义**。(每个程序当然遵守这一点，否则程序的结果完全无法预测)
-3. 第3句说明什么是**线程内语义——就像（以当前线程为）单线程程序进行运行，并且可以通过线程内读取操作所看见的值完全预测线程的行为**，
+3. 第3句说明什么是**线程内语义——就像（以当前线程为）单线程程序进行运行，并且可以通过线程内读取操作所看见的值完全预测线程的行为**(as-if-serial)，
 以及如何评估一个线程执行的操作是否合法（通过假设当前线程在单线程上下文中执行操作）。
 4. 第4句，每个线程内部生成的**线程间操作**必须(must)符合(match)程序顺序(program order)，如果该操作是一个读取动作，则这个操作具体看到的值由JMM模型确定。
 
@@ -51,7 +51,8 @@ JLS 17.4.1
 3. 第3句描述了哪些变量不会跨线程共享因此不受JMM影响（本地变量，方法形参，异常处理程序参数）。
 4. 第4句定义什么叫（操作）冲突（针对同一个共享变量的两次访问，且其中至少有一次是写操作）。
 
-# 线程间操作(inter-thread)
+# 线程间操作(inter-thread actions)
+JLS 17.4.2
 ```text
 An inter-thread action is an action performed by one thread that can be detected or directly influenced by another thread
 ```
@@ -98,7 +99,7 @@ class Externalization {
   } */
 }
 ```
-核心概念就是外部操作和线程发散操作也是不被允许重排序,否则如上例程序会出现不符合预期的结果(断言不是永远为true)。
+核心概念就是**外部操作和线程发散操作也是不被允许重排序**,否则如上例程序会出现不符合预期的结果(断言不是永远为true)。
 
 ```text
 1. This specification is only concerned with inter-thread actions. 
@@ -107,6 +108,30 @@ We will usually refer to inter-thread actions more succinctly as simply actions.
 ......
 ```
 这段强调上面说的全部操作的规范只适用于线程间操作，而**任何Java程序都遵守正确的线程内操作语义**。
+
+# 程序和程序顺序
+JLS 17.4.3
+```markdown
+1. Among all the inter-thread actions performed by each thread t, the program order of t is a total order that reflects the order in which these actions would be performed according to the intra-thread semantics of t.
+2. A set of actions is sequentially consistent if all actions occur in a total order (the execution order) that is consistent with program order, and furthermore, each read r of a variable v sees the value written by the write w to v such that:
+    - w comes before r in the execution order, and
+    - there is no other write w' such that w comes before w' and w' comes before r in the execution order.
+3. Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
+4. **If a program has no data races, then all executions of the program will appear to be sequentially consistent.**
+5. Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
+```
+这段话是寥寥几句，但为精髓中的精髓。为什么这么说呢，因为在著名并发相关的《Java并发编程的艺术》一书中涉及到了这块知识，但直到我看到JLS，我才发现以前自己看那本书得到相关知识的理解是错误的。
+让我们来逐字逐句推敲一下这段话。
+### 程序顺序 
+第一句就显得有一点云遮雾障，核心其实就是在说什么是程序顺序(program order)——在每个线程执行的**所有线程间操作中**，程序顺序是一个基于**线程内语义**映射而成的这些操作执行顺序的总体排序。
+当然我相信这样翻译还是有点抽象，更具体一点来说。首先基于上文我们已知
+1. 所有线程操作分为两类，分别是线程间和线程内操作。
+2. 线程内操作满足线程内语义
+由此可以推出，在每个线程的全部线程间操作中，该线程的程序顺序为，线程间操作的实际执行顺序是符合线程内语义而映射成的一个整体顺序。
+综上，程序顺序可以大白话为，每个线程的线程间操作实际执行的结果必须与按照我们写程序的先后顺序一样执行得到的结果一致。（留足线程间操作优化的空间，只要结果一致那么任何实际执行顺序都是合法的）
+
+### 顺序一致性模型
+第2段这里更是重量级！更是言简意赅凝练到了极致。
 
 
 ```text
