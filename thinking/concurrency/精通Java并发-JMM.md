@@ -31,12 +31,12 @@ To determine if the actions of thread t in an execution are legal, we simply eva
 If a is a read, then further evaluation of t uses the value seen by a as determined by the memory model.
 ```
 1. 第1句，**内存模型确认程序在任意时间点可以读取到哪些值**（内存模型的最准确的使用描述）。
-2. 第2句说明如果每个线程隔离的操作由当前线程的语义进行约束（读取的值由JMM控制除外），则程序遵守**线程内语义**。（每个程序当然遵守这一点，否则程序的结果完全无法预测）
+2. 第2句说明如果每个线程隔离的操作由当前线程的语义进行约束（读取的值由JMM控制除外），则程序遵守**线程内语义**。(每个程序当然遵守这一点，否则程序的结果完全无法预测)
 3. 第3句说明什么是**线程内语义——就像（以当前线程为）单线程程序进行运行，并且可以通过线程内读取操作所看见的值完全预测线程的行为**，
 以及如何评估一个线程执行的操作是否合法（通过假设当前线程在单线程上下文中执行操作）。
 4. 第4句，每个线程内部生成的**线程间操作**必须(must)符合(match)程序顺序(program order)，如果该操作是一个读取动作，则这个操作具体看到的值由JMM模型确定。
 
-这段话言简意赅，是JMM整体的要义核心。明确了JMM的抽象逻辑结构（堆内存共享），职责范围（只影响堆内存内的变量），触发时机（当出现线程间的读取操作时），以及**单线程的线程间操作具有程序顺序性**。
+这段话言简意赅，是JMM整体的要义核心。明确了JMM的抽象逻辑结构（堆内存共享），职责范围（只影响堆内存内的变量），触发时机（当出现线程间的读取操作时），以及**单线程的线程间操作具有程序顺序性**(禁止与其他操作(无论是线程内还是外)重排序)。
 
 # 共享变量
 JLS 17.4.1
@@ -71,7 +71,42 @@ There are several kinds of inter-thread action that a program may perform:
 5. Thread divergence actions (§17.4.9). A thread divergence action is only performed by a thread that is in an infinite loop in which no memory, synchronization, or external actions are performed. If a thread performs a thread divergence action, it will be followed by an infinite number of thread divergence actions.
    - Thread divergence actions are introduced to model how a thread may cause all other threads to stall and fail to make progress.
 ```
-这里列举了程序具有的多种线程间操作。
+这里列举了程序具有的多种线程间操作，值得注意的是第4和第5种，外部调用和线程发散操作。这两个比较难理解，幸好有前辈早就问过这个问题(https://stackoverflow.com/questions/26788260/examples-for-thread-divergence-actions-and-external-actions-in-the-java-memory-m)。
+摘抄一下里面的代码
+```java
+class ThreadDivergence {
+  int foo = 0;
+  void thread1() { 
+    while (true); // thread-divergence action
+    foo = 42; 
+  } 
+
+  void thread2() { 
+    assert foo == 0; 
+  } 
+}
+
+class Externalization {
+   int foo = 0;
+   void method() {
+      jni(); // external action
+      foo = 42;
+   }
+
+   native void jni(); /* { 
+    assert foo == 0; 
+  } */
+}
+```
+核心概念就是外部操作和线程发散操作也是不被允许重排序,否则如上例程序会出现不符合预期的结果(断言不是永远为true)。
+
+```text
+1. This specification is only concerned with inter-thread actions. 
+2. We do not need to concern ourselves with intra-thread actions (e.g., adding two local variables and storing the result in a third local variable). As previously mentioned, all threads need to obey the correct intra-thread semantics for Java programs. 
+We will usually refer to inter-thread actions more succinctly as simply actions.
+......
+```
+这段强调上面说的全部操作的规范只适用于线程间操作，而**任何Java程序都遵守正确的线程内操作语义**。
 
 
 ```text
