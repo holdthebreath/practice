@@ -6,7 +6,7 @@
 包含原文及个人理解，不一定完全正确，如有疑问欢迎讨论及自行探讨。
 # 什么是Java Memory Model
 JLS 17.4
-```text
+```markdown
 1. A memory model describes, given a program and an execution trace of that program, whether the execution trace is a legal execution of the program. 
 2. The Java programming language memory model works by examining each read in an execution trace and checking that the write observed by that read is valid according to certain rules.
 3. The memory model describes possible behaviors of a program. An implementation is free to produce any code it likes, as long as all resulting executions of a program produce a result that can be predicted by the memory model.
@@ -21,7 +21,7 @@ JLS 17.4
    - 个人理解：稍微有点拗口，简单理解为，核心校验每次读取值的合法性（比如读一个正确同步的共享变量，但读取到的值不是“最新”写入的，那么则是非法的），
    所以反过来理解，没有正确同步的共享变量，有可见性问题是完全合法的（法无禁即自由？）
 
-```text
+```markdown
 1. The memory model determines what values can be read at every point in the program. 
 2. The actions of each thread in isolation must behave as governed by the semantics of that thread, with the exception that the values seen by each read are determined by the memory model.
 When we refer to this, we say that the program obeys intra-thread semantics.
@@ -40,7 +40,7 @@ If a is a read, then further evaluation of t uses the value seen by a as determi
 
 # 共享变量
 JLS 17.4.1
-```text
+```markdown
 1. Memory that can be shared between threads is called shared memory or heap memory.
 2. All instance fields, static fields, and array elements are stored in heap memory. In this chapter, we use the term variable to refer to both fields and array elements.
 3. Local variables (§14.4), formal method parameters (§8.4.1), and exception handler parameters (§14.20) are never shared between threads and are unaffected by the memory model.
@@ -53,7 +53,7 @@ JLS 17.4.1
 
 # 线程间操作(inter-thread actions)
 JLS 17.4.2
-```text
+```markdown
 An inter-thread action is an action performed by one thread that can be detected or directly influenced by another thread
 ```
 定义：如果一个线程执行的操作可以**被其他线程监测到(be detected)或者被(其他线程)直接影响(directly influenced by)**，那么这个操作叫线程间操作。注意与线程内操作(Intra-thread)英文的区分！
@@ -101,7 +101,7 @@ class Externalization {
 ```
 核心概念就是**外部操作和线程发散操作也是不被允许重排序**,否则如上例程序会出现不符合预期的结果(断言不是永远为true)。
 
-```text
+```markdown
 1. This specification is only concerned with inter-thread actions. 
 2. We do not need to concern ourselves with intra-thread actions (e.g., adding two local variables and storing the result in a third local variable). As previously mentioned, all threads need to obey the correct intra-thread semantics for Java programs. 
 We will usually refer to inter-thread actions more succinctly as simply actions.
@@ -123,18 +123,20 @@ JLS 17.4.3
 这段话是寥寥几句，但为精髓中的精髓。为什么这么说呢，因为在著名并发相关的《Java并发编程的艺术》一书中涉及到了这块知识，但直到我看到JLS，我才发现以前自己看那本书得到相关知识的理解是错误的。
 让我们来逐字逐句推敲一下这段话。
 ### 程序顺序 
-第一句就显得有一点云遮雾障，核心其实就是在说什么是程序顺序(program order)——在每个线程执行的**所有线程间操作中**，程序顺序是一个基于**线程内语义**映射而成的这些操作执行顺序的总体排序。
+第一句就显得有一点云遮雾障，核心其实就是在说什么是程序顺序(program order)——在每个线程执行的所有**线程间操作**中，程序顺序是反映根据**线程内语义**执行这些操作的顺序的总顺序。
 当然我相信这样翻译还是有点抽象，更具体一点来说。首先基于上文我们已知
 1. 所有线程操作分为两类，分别是线程间和线程内操作。
 2. 线程内操作满足线程内语义
-由此可以推出，在每个线程的全部线程间操作中，该线程的程序顺序为，线程间操作的实际执行顺序是符合线程内语义而映射成的一个整体顺序。
-综上，程序顺序可以大白话为，每个线程的线程间操作实际执行的结果必须与按照我们写程序的先后顺序一样执行得到的结果一致。（留足线程间操作优化的空间，只要结果一致那么任何实际执行顺序都是合法的）
+由此可以看出，而线程间操作是在之前是没有规范的，而没有规范就意味无法预测结果，所以需要增加这一规则进行约束。
+在每个线程的全部线程间操作中，该线程的程序顺序为，**线程间操作的实际执行顺序是符合线程内语义而映射成的一个整体顺序**。
+简化一下，**程序顺序是线程的线程间操作实际执行的顺序遵循线程内语意(在单线程程序下线程的行为可以通过读取操作看到的值完全预测)的总排序**
+目的是留足线程间操作优化的空间，只要结果一致那么任何实际执行顺序都是合法的
 
 ### 顺序一致性模型
 第2段这里更是重量级！更是言简意赅凝练到了极致。
 
 
-```text
+```markdown
 If a program has no data races, then all executions of the program will appear to be sequentially consistent.
 ```
 
