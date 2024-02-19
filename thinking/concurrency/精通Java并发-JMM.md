@@ -130,8 +130,47 @@ JLS 17.4.3
 由此可以看出，而线程间操作是在之前是没有规范的，而没有规范就意味无法预测结果，所以需要增加这一规则进行约束。
 总结一下，**程序顺序是线程的线程间操作实际执行的顺序遵循线程内语意(在单线程程序下线程的行为可以通过读取操作看到的值完全预测)的总排序**
 
-### 顺序一致性模型
-第2段这里更是重量级！更是言简意赅凝练到了极致。首先翻译一下，顺序一致是
+### 顺序一致性(模型)
+第2段这里更是重量级！更是言简意赅凝练到了极致。
+首先翻译一下，**如果所有（线程的）操作发生的总顺序（执行顺序）与程序顺序一致，则这组操作具有顺序一致性**，后面的这段我理解是讲解顺序一致性模型的特点的。
+所以理解这段话我们得首先弄明白什么是顺序一致性模型。
+#### 顺序一致性模型
+来自维基百科 https://en.wikipedia.org/wiki/Sequential_consistency
+```markdown
+1. Sequential consistency is a consistency model used in the domain of concurrent computing (e.g. in distributed shared memory, distributed transactions, etc.).
+2. It is the property that "... the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program."
+```
+顺序一致性是一个一致性模型，应用在并发计算领域。提出这个理论的是Leslie Lamport巨佬，在分布式时空领域的伟大名字(Lamport timestamps)，包括接下来的happens-before也是他提出的。
+我们通过下面的图快速理解这个模型：
+```markdown
+ Thread 1 |   Thread 2
+    A1    |     B1 
+    A2    |     B2
+    A3    |     B3
+假设有两个线程T1和T2，他们的操作分别为A和B，以及对应的依赖关系3->2->1。
+顺序一致性模型的图：
+------    ------
+| T1 |    | T2 |
+------    ------
+  |         |
+        |  
+  -------------
+  |heap memory|
+  -------------
+```
+大致的结构类似这样，最终通过内存开关连接不同的线程使两个线程的操作具有全局的一个顺序性，也因此具有每个写操作的结果对后续操作读可见特性。
+还不够清晰的话，可以理解为现在你左右手（每个线程）各有一堆牌（操作），然后你将他们交错互相插入最终形成一堆牌（总顺序）。
+举几个例子
+```markdown
+A1 -> B1 -> A2 -> B2 -> A3 -> B3
+A1 -> B1 -> B2 -> A2 -> B3 -> A3
+B1 -> B2 -> B3 -> A1 -> A2 -> A3
+```
+上面三种可能的执行顺序都是符合顺序一致性的。
+总结，只要每个线程操作的执行顺序，满足依赖关系，即执行顺序符合1->2->3，两个线程任意实际总顺序都是符合顺序一致性的。
+当理解了这一点，我们就可以一目了然的发现核心关键————实际执行的具体的调度其实没有任何约束。
+从这里，我们隐隐约约感觉到，自己好像已经摸索到实际会出现并发相关问题的本质原因了。
+
 
 
 ```markdown
