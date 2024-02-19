@@ -166,14 +166,15 @@ A1 -> B1 -> A2 -> B2 -> A3 -> B3
 A1 -> B1 -> B2 -> A2 -> B3 -> A3
 B1 -> B2 -> B3 -> A1 -> A2 -> A3
 ```
+
 上面三种可能的执行顺序都是符合顺序一致性的。
 总结，**只要每个线程操作的执行顺序，满足依赖关系，即执行顺序符合1->2->3，两个线程任意实际总顺序都是符合顺序一致性的。**
-当理解了这一点，我们就可以一目了然的发现核心关键————实际执行的具体的调度其实没有任何约束。
+当理解了这一点，我们就可以一目了然的发现核心关键——实际执行的具体线程的调度其实没有任何约束。
 从这里，我们隐隐约约感觉到，自己好像已经摸索到实际会出现并发相关问题的本质原因了。
 
-
-
 ```markdown
-If a program has no data races, then all executions of the program will appear to be sequentially consistent.
+1. Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
+2. If a program has no data races, then all executions of the program will appear to be sequentially consistent.
+3. Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
 ```
 
