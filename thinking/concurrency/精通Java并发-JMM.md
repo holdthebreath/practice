@@ -171,10 +171,9 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 总结，**只要每个线程的操作的执行顺序，满足该线程程序的顺序(注意这里和程序顺序的区分)，即执行顺序符合1->2->3，两个线程任意实际总顺序都是符合顺序一致性的。**
 当理解了这一点，我们就可以一目了然的发现核心关键——实际执行的具体线程的调度其实没有任何约束。
 从这里，我们隐隐约约感觉到，自己好像已经摸索到实际会出现并发相关问题的本质原因了。
-不过，JMM并没有采用顺序一致性模型：
 ```markdown
 1. Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
 2. If a program has no data races, then all executions of the program will appear to be sequentially consistent.
 3. Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
 ```
-
+1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的顺序的保证，总执行顺序**符合程序的顺序（注意和程序顺序的区分）**，每个独立的操作都具有原子性而且
