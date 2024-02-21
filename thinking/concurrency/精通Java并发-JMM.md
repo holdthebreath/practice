@@ -175,11 +175,14 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 2. order of program：程序的顺序，我们写代码时的先后顺序，体现了我们期望线程实现什么样的行为。
 3. program order：程序顺序，符合单线程语义的顺序(单线程上下文下线程的行为可以完全预测)。反过来说，**只要线程的行为是符合单线程语义，那么任何执行顺序都是合法的(重排序)**。可以简单理解为，**program order是一种约束规则，使线程在效果上表现为按照order of program进行执行**。所以从结果角度可以简单认为program order就是order of program，但要清楚两者具体含义并不相同。
 
-当理解了这一点，我们就可以一目了然的发现核心关键——实际执行的具体线程的调度其实没有任何约束。
-从这里，我们隐隐约约感觉到，自己好像已经摸索到实际会出现并发相关问题的本质原因了。
+当理解了这一点，我们就可以一目了然的发现核心关键——**实际执行的具体线程的调度其实没有任何约束**。
+从这里，我们隐隐约约感觉到，好像已经摸索到实际会出现并发相关问题的本质原因了——**对线程进行任意调度执行都是合法的**。
 ```markdown
 1. Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
 2. If a program has no data races, then all executions of the program will appear to be sequentially consistent.
 3. Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
 ```
-1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的顺序的保证，总执行顺序**符合程序的顺序（注意和程序顺序的区分）**，每个独立的操作都具有原子性而且
+1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的执行顺序的保证。在顺序一致性模型内执行，每个独立的操作都具有原子性而且总执行顺序符合**程序顺序**，以及每个独立操作具有原子性并对所有线程立即可见。
+2. 总结顺序一致性和Java程序的关系——如果程序没有**数据竞争**，程序的全部操作执行（的效果）**表现的像顺序一致性**。
+3. 顺序一致性模型的职责范围——无论是否存在数据竞争，都仍然**允许由一系列操作需要原子性（而实际没有）引发错误**。
+这里根据上面的例子可以很好理解，意思是假设线程的结果必须要求依赖(1->2->3)三个操作为原子执行(中间不能穿插另一个线程的操作)，那么顺序一致性是允许这种情况出现错误。（因为顺序一致性模型并不具有多个操作原子性的保证）。从本质上来看，这种情况下**线程结果的正确性依赖了特定的线程调度顺序（竞态条件），而正如上文所说，对线程的调度不会存在任何约束。**
