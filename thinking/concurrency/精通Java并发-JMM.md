@@ -181,8 +181,10 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 1. Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
 2. If a program has no data races, then all executions of the program will appear to be sequentially consistent.
 3. Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
+4. If we were to use sequential consistency as our memory model, many of the compiler and processor optimizations that we have discussed would be illegal.
 ```
 1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的执行顺序的保证。在顺序一致性模型内执行，每个独立的操作都具有原子性而且总执行顺序符合**程序顺序**，以及每个独立操作具有原子性并对所有线程立即可见。
 2. 总结顺序一致性和Java程序的关系——如果程序没有**数据竞争**，程序的全部操作执行（的效果）**表现的像顺序一致性**。
 3. 顺序一致性模型的职责范围——无论是否存在数据竞争，都仍然**允许由一系列操作需要原子性（而实际没有）引发错误**。
 这里根据上面的例子可以很好理解，意思是假设线程的结果必须要求依赖(1->2->3)三个操作为原子执行(中间不能穿插另一个线程的操作)，那么顺序一致性是允许这种情况出现错误。（因为顺序一致性模型并不具有多个操作原子性的保证）。从本质上来看，这种情况下**线程结果的正确性依赖了特定的线程调度顺序（竞态条件），而正如上文所说，对线程的调度不会存在任何约束。**
+4. 补充说明了**JMM并没有采用顺序一致性模型**的原因——许多编译器和处理器的优化将会被认为是非法的。
