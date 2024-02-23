@@ -188,3 +188,24 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 3. 顺序一致性模型的职责范围——无论是否存在数据竞争，都仍然**允许由一系列操作需要原子性（而实际没有）引发错误**。
 这里根据上面的例子可以很好理解，意思是假设线程的结果必须要求依赖(1->2->3)三个操作为原子执行(中间不能穿插另一个线程的操作)，那么顺序一致性是允许这种情况出现错误。（因为顺序一致性模型并不具有多个操作原子性的保证）。从本质上来看，这种情况下**线程结果的正确性依赖了特定的线程调度顺序（竞态条件），而正如上文所说，对线程的调度不会存在任何约束。**
 4. 补充说明了**JMM并没有采用顺序一致性模型**的原因——许多编译器和处理器的优化将会被认为是非法的。
+
+# 同步顺序
+JLS 17.4.4
+```markdown
+Every execution has a synchronization order. 
+A synchronization order is a total order over all of the synchronization actions of an execution. 
+For each thread t, the synchronization order of the synchronization actions (§17.4.2) in t is consistent with the program order (§17.4.3) of t.
+```
+这段说明了什么是同步顺序——同步顺序是执行全部**同步操作**的总排序。不过最重要的是最后一句，针对每个线程，**线程的同步顺序与程序顺序一致**。
+```markdown
+1. Synchronization actions induce the synchronized-with relation on actions, defined as follows:
+- An unlock action on monitor m synchronizes-with all subsequent lock actions on m (where "subsequent" is defined according to the synchronization order).
+- A write to a volatile variable v (§8.3.1.4) synchronizes-with all subsequent reads of v by any thread (where "subsequent" is defined according to the synchronization order).
+- An action that starts a thread synchronizes-with the first action in the thread it starts.
+- The write of the default value (zero, false, or null) to each variable synchronizes-with the first action in every thread.
+Although it may seem a little strange to write a default value to a variable before the object containing the variable is allocated, conceptually every object is created at the start of the program with its default initialized values.
+- The final action in a thread T1 synchronizes-with any action in another thread T2 that detects that T1 has terminated.
+- T2 may accomplish this by calling T1.isAlive() or T1.join().
+If thread T1 interrupts thread T2, the interrupt by T1 synchronizes-with any point where any other thread (including T2) determines that T2 has been interrupted (by having an InterruptedException thrown or by invoking Thread.interrupted or Thread.isInterrupted).
+2. The source of a synchronizes-with edge is called a release, and the destination is called an acquire.
+```
