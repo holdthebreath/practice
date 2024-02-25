@@ -141,7 +141,26 @@ JLS 17.4.3
 2. It is the property that "... the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program."
 ```
 顺序一致性是一个一致性模型，应用在并发计算领域。提出这个理论的是Leslie Lamport巨佬，在分布式时空领域的伟大名字(Lamport timestamps)，包括接下来的happens-before也是他提出的。
-我们通过下面的图快速理解这个模型：
+```markdown
+1. A high-speed **processor may execute operations in a different order than is specified by the program.** 
+   The correctness of the execution is guaranteed if the processor satisfies the following condition: 
+   **the result of an execution is the same as if the operations had been executed in the order specified by the program.**
+   A processor satisfying this condition will be called sequential.
+2. **the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program.**
+   A multiprocessor satisfying this condition will be called sequentially consistent. 
+   **The sequentiality of each individual processor does not guarantee that the multi-processor computer is sequentially consistent.**
+
+How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs
+```
+1. 处理器实际执行操作的顺序**有可能**与程序定义的顺序并不相同
+2. 处理器如果执行结果与程序定义的顺序执行生成的结果相同，那么则称这个处理器具有顺序性(sequential)。
+3. 多核处理器如果任何(实际)执行(顺序)的结果与所有处理器的操作以顺序性(sequential)方式执行相同，并且每个单独处理器的操作以其程序指定的顺序出现，则称这个多核处理器是顺序一致的。
+4. 每个单核具有顺序性并不能保证多核具有顺序一致性
+第4点是这篇论文讨论的核心，不过与我们理解顺序一执行模型并不相关，就不展开了。核心点是多核实现顺序一致性需要满足两个条件：
+1. 每个处理器发送内存请求的顺序与程序定义的顺序相同
+2. 所有处理器向单个内存模块发出的内存请求进入单个FIFO队列(已内存模块为纬度的队列)进行顺序处理。发出内存请求的顺序与进入内存的顺序一致。
+
+这个是巨佬的论文定义，我们通过下面的图快速理解这个模型：
 ```markdown
  Thread 1 |   Thread 2
     A1    |     B1 
