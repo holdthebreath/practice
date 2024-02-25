@@ -138,7 +138,8 @@ JLS 17.4.3
 来自维基百科 https://en.wikipedia.org/wiki/Sequential_consistency
 ```markdown
 1. Sequential consistency is a consistency model used in the domain of concurrent computing (e.g. in distributed shared memory, distributed transactions, etc.).
-2. It is the property that "... the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program."
+2. **the execution order of a program in the same processor (or thread) is the same as the program order, while the execution order of a program on different processors (or threads) is undefined.**
+细品第2句。
 ```
 顺序一致性是一个一致性模型，应用在并发计算领域。提出这个理论的是Leslie Lamport巨佬，在分布式时空领域的伟大名字(Lamport timestamps)，包括接下来的happens-before也是他提出的。
 ```markdown
@@ -157,8 +158,8 @@ How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Progr
 3. 多核处理器如果任何(实际)执行(顺序)的结果与所有处理器的操作以顺序性(sequential)方式执行相同，并且每个单独处理器的操作以其程序指定的顺序出现，则称这个多核处理器是顺序一致的。
 4. 每个单核具有顺序性并不能保证多核具有顺序一致性
 第4点是这篇论文讨论的核心，不过与我们理解顺序一执行模型并不相关，就不展开了。核心点是多核实现顺序一致性需要满足两个条件：
-1. 每个处理器发送内存请求的顺序与程序定义的顺序相同
-2. 所有处理器向单个内存模块发出的内存请求进入单个FIFO队列(已内存模块为纬度的队列)进行顺序处理。发出内存请求的顺序与进入内存的顺序一致。
+1. 每个处理器**发送**(issue)(这里的发送并不是执行的概念，注意含义区别)内存请求的顺序与程序定义的顺序相同
+2. 所有处理器向单个内存模块**发送**的内存请求进入单个FIFO队列(已内存模块为维度的队列)进行顺序执行。**发送**内存请求的顺序与进入内存的顺序一致。
 
 这个是巨佬的论文定义，我们通过下面的图快速理解这个模型：
 ```markdown
