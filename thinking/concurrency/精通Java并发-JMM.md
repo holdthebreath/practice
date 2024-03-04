@@ -227,5 +227,16 @@ Although it may seem a little strange to write a default value to a variable bef
 - The final action in a thread T1 synchronizes-with any action in another thread T2 that detects that T1 has terminated.
 - T2 may accomplish this by calling T1.isAlive() or T1.join().
 If thread T1 interrupts thread T2, the interrupt by T1 synchronizes-with any point where any other thread (including T2) determines that T2 has been interrupted (by having an InterruptedException thrown or by invoking Thread.interrupted or Thread.isInterrupted).
-2. The source of a synchronizes-with edge is called a release, and the destination is called an acquire.
 ```
+同步操作包含了同步-与关系(synchronized-with)
+1. monitor解锁(unlock) synchronized-with 后续同个锁的锁定(lock)
+2. 写volatile变量 synchronized-with 后续任意线程读同一个变量
+3. 启动一个线程的操作 synchronized-with 被启动线程的第一个操作
+4. 写变量默认值的操作 synchronized-with 线程针对该变量的第一个操作
+5. 线程T1最后一个操作 synchronized-with 线程T2中检测到T1已终止的任何操作
+6. 如果线程T1中断了线程T2，则T1的中断操作 synchronized-with 任意时刻其他线程(包括T2)检测到T2已经被中断(通过抛出InterruptedException或调用Thread.interrupted或Thread.isInterrupted)
+```markdown
+The source of a synchronizes-with edge is called a release, and the destination is called an acquire.
+```
+同步关系发起的边界称为释放(release)，接收的目标称为获取(acquire)。
+这段可能看起来有点拗口，本质上定义了Java程序中全部的同步操作。仔细想想，这也是我们实际在开发过程中一直有的思维定势，无非更书面化的定义，为下文的happens-before打好理论基础。
