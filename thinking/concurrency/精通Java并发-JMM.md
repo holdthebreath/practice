@@ -218,14 +218,14 @@ For each thread t, the synchronization order of the synchronization actions (§1
 ```
 这段说明了什么是同步顺序——同步顺序是执行全部**同步操作**的总排序。不过最重要的是最后一句，针对每个线程，**线程的同步顺序与程序顺序一致**。
 ```markdown
-1. Synchronization actions induce the synchronized-with relation on actions, defined as follows:
-- An unlock action on monitor m synchronizes-with all subsequent lock actions on m (where "subsequent" is defined according to the synchronization order).
-- A write to a volatile variable v (§8.3.1.4) synchronizes-with all subsequent reads of v by any thread (where "subsequent" is defined according to the synchronization order).
-- An action that starts a thread synchronizes-with the first action in the thread it starts.
-- The write of the default value (zero, false, or null) to each variable synchronizes-with the first action in every thread.
+- Synchronization actions induce the synchronized-with relation on actions, defined as follows:
+1. An unlock action on monitor m synchronizes-with all subsequent lock actions on m (where "subsequent" is defined according to the synchronization order).
+2. A write to a volatile variable v (§8.3.1.4) synchronizes-with all subsequent reads of v by any thread (where "subsequent" is defined according to the synchronization order).
+3. An action that starts a thread synchronizes-with the first action in the thread it starts.
+4. The write of the default value (zero, false, or null) to each variable synchronizes-with the first action in every thread.
 Although it may seem a little strange to write a default value to a variable before the object containing the variable is allocated, conceptually every object is created at the start of the program with its default initialized values.
-- The final action in a thread T1 synchronizes-with any action in another thread T2 that detects that T1 has terminated.
-- T2 may accomplish this by calling T1.isAlive() or T1.join().
+5. The final action in a thread T1 synchronizes-with any action in another thread T2 that detects that T1 has terminated.
+6. T2 may accomplish this by calling T1.isAlive() or T1.join().
 If thread T1 interrupts thread T2, the interrupt by T1 synchronizes-with any point where any other thread (including T2) determines that T2 has been interrupted (by having an InterruptedException thrown or by invoking Thread.interrupted or Thread.isInterrupted).
 ```
 同步操作包含了同步-与关系(synchronized-with)
@@ -240,3 +240,32 @@ The source of a synchronizes-with edge is called a release, and the destination 
 ```
 同步关系发起的边界称为释放(release)，接收的目标称为获取(acquire)。
 这段可能看起来有点拗口，本质上定义了Java程序中全部的同步操作。仔细想想，这也是我们实际在开发过程中一直有的思维定势，无非更书面化的定义，为下文的happens-before打好理论基础。
+
+# happens-before order
+17.4.5
+相信happens-before规则大家都是了然于胸，很多八股文列了十几条具体的规则，这个纯靠背的话感觉就有点难度了。难道真的要一条一条去硬记吗？万幸jls告诉我们并不需要。
+```markdown
+**Two actions can be ordered by a happens-before relationship. If one action happens-before another, then the first is visible to and ordered before the second.**
+If we have two actions x and y, we write hb(x, y) to indicate that x happens-before y.
+1. If x and y are actions of the same thread and x comes before y in program order, then hb(x, y).
+2. There is a happens-before edge from the end of a constructor of an object to the start of a finalizer (§12.6) for that object.
+3. If an action x synchronizes-with a following action y, then we also have hb(x, y).
+4. If hb(x, y) and hb(y, z), then hb(x, z).
+```
+如果已经对happens-before有深刻理解，只是想了解规范如何定义整套规则的，那么只需要看这段就足够了。
+- 两个操作可以通过happens-before排序。如果一个操作happens-before另一个，则第一个操作对第二个操作是可见的，并且在第二个操作之前发生。
+接下来列的是4条规则，没错，实际的happens-before只需要4条，前提是我们明白什么是synchronizes-with关系。
+总结而言，**单线程的操作happens-before基于程序顺序，多线程的happens-before基于synchronizes-with，happens-before具有传递性**。
+我想经过上面的“训练”，已经形成条件反射了——法无禁即自由。对没错，任意两个操作如果没有happens-before关系，则发生顺序与可见性完全没有约束，一切都是合法的。
+```markdown
+1. The wait methods of class Object (§17.2.1) have lock and unlock actions associated with them; their happens-before relationships are defined by these associated actions.
+2. It should be noted that the presence of a happens-before relationship between two actions does not necessarily imply that they have to take place in that order in an implementation. If the reordering produces results consistent with a legal execution, it is not illegal.
+For example, the write of a default value to every field of an object constructed by a thread need not happen before the beginning of that thread, as long as no read ever observes that fact.
+3. More specifically, if two actions share a happens-before relationship, they do not necessarily have to appear to have happened in that order to any code with which they do not share a happens-before relationship.
+   Writes in one thread that are in a data race with reads in another thread may, for example, appear to occur out of order to those reads.
+```
+1. 在Object类中wait方法关联了lock/unlock操作，它们的happens-before关系由关联这两个操作定义。(为什么wait方法在Object类中？我相信这里是这道八股文的起源^_^)
+2. 需要注意的是**两个操作具有happens-before关系并不意味着它们必须在实际中按这个顺序执行**。如果重排序的结果与合法执行一致，则(该顺序)不非法。
+3. 更具体的说，如
+
+
