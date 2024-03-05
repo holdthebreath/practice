@@ -266,6 +266,9 @@ For example, the write of a default value to every field of an object constructe
 ```
 1. 在Object类中wait方法关联了lock/unlock操作，它们的happens-before关系由关联这两个操作定义。(为什么wait方法在Object类中？我相信这里是这道八股文的起源^_^)
 2. 需要注意的是**两个操作具有happens-before关系并不意味着它们必须在实际中按这个顺序执行**。如果重排序的结果与合法执行一致，则(该顺序)不非法。
-3. 更具体的说，如
-
-
+3. 更具体的说，**如果两个操作共享(share)happens-before关系，对于不共享happens-before关系的其他代码，它们并不需要必须(do not necessarily have to)表现按照这个顺序发生**。这句有点拗口对不对，举个实际的栗子，文中说的线程写变量的冲突。
+比如线程1有2个操作，1. 写共享变量a, 2. 读取共享变量a，则根据单线程原则，1和2共享happens-before关系(1必须在2之前发生)。但对于另一个线程2假设只有一个操作读取a，在没有同步关系(synchronized-with)时，则无论是操作1还是2都没有happens-before关系，因此它观察到线程1的实际执行效果可能为先执行2，后执行1。(可见性问题，详细点说，有可能的情况为操作1先写在了线程1私有内存，没有刷新到主存，然后执行操作2。在这两个操作之间。线程2读取了变量，这时线程2观察到的结果与线程1先执行操作2后操作1的结果一致)
+```markdown
+The happens-before relation defines when data races take place.
+```
+happens-before关系的目的在这句，**happens-before定义何时存在数据冲突**。
