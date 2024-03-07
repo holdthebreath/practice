@@ -269,6 +269,26 @@ For example, the write of a default value to every field of an object constructe
 3. 更具体的说，**如果两个操作共享(share)happens-before关系，对于不共享happens-before关系的其他代码，它们并不需要必须(do not necessarily have to)表现按照这个顺序发生**。这句有点拗口对不对，举个实际的栗子，文中说的线程写变量的冲突。
 比如线程1有2个操作，1. 写共享变量a, 2. 读取共享变量a，则根据单线程原则，1和2共享happens-before关系(1必须在2之前发生)。但对于另一个线程2假设只有一个操作读取a，在没有同步关系(synchronized-with)时，则无论是操作1还是2都没有happens-before关系，因此它观察到线程1的实际执行效果可能为先执行2，后执行1。(可见性问题，详细点说，有可能的情况为操作1先写在了线程1私有内存，没有刷新到主存，然后执行操作2。在这两个操作之间。线程2读取了变量，这时线程2观察到的结果与线程1先执行操作2后操作1的结果一致)
 ```markdown
-The happens-before relation defines when data races take place.
+1. The happens-before relation defines when data races take place.
+2. A set of synchronization edges, S, is **sufficient** if it is the minimal set such that the **transitive closure** of S with the program order determines all of the happens-before edges in the execution. This set is unique.
+It follows from the above definitions that:
+- An unlock on a monitor happens-before every subsequent lock on that monitor.
+- A write to a volatile field (§8.3.1.4) happens-before every subsequent read of that field.
+- A call to start() on a thread happens-before any actions in the started thread.
+- All actions in a thread happen-before any other thread successfully returns from a join() on that thread.
+- The default initialization of any object happens-before any other actions (other than default-writes) of a program.
+3. When a program contains two conflicting accesses (§17.4.1) that are not ordered by a happens-before relationship, it is said to contain a data race.
+4. The semantics of operations other than inter-thread actions, such as reads of array lengths (§10.7), executions of checked casts (§5.5, §15.16), and invocations of virtual methods (§15.12), are not directly affected by data races.
+
 ```
-happens-before关系的目的在这句，**happens-before定义何时存在数据冲突**。
+1. happens-before关系的目的在这句，**happens-before定义何时存在数据冲突**。
+2. 这段有两个术语，充分的(sufficient)/传递闭包(transitive closure)，读起来不直观，然后我就问了GPT。(当然应该是自己不懂图论)
+```markdown
+传递闭包（Transitive Closure）在这个上下文中，是指从一组同步边（Synchronization Edges）出发，通过递归地应用传递性（如果A happens-before B，且B happens-before C，则A happens-before C），来获得所有可能的 happens-before 关系的集合。这个概念来自图论，其中**传递闭包用于找到图中所有可达的顶点对。**
+具体到并发编程和内存模型的上下文，传递闭包帮助我们确定在程序中可能的所有 happens-before 关系。在这种情况下，同步边集合 S 通过程序的执行顺序（Program Order）和已定义的 happens-before 规则，定义了一组原始的 happens-before 关系。
+如果你能够通过这组同步边 S 和程序的执行顺序，推导出执行中所有可能的 happens-before 关系（即，没有额外的 happens-before 关系可以被推导出，但未被 S 捕捉），那么我们说这组同步边 S 是充分的（Sufficient）。
+简单来说，在这个上下文中，传递闭包就是通过不断应用 happens-before 的定义，找到所有间接的 happens-before 关系，确保能覆盖程序执行中所有可能的 happens-before 关系。这是确保程序正确同步的一个关键步骤，因为它涵盖了所有必须被同步的操作，以避免数据竞争和其他并发问题。
+```
+3. 说明了数据冲突的定义——当程序存在两个**冲突访问**且没有通过happens-before关系排序，则称为程序存在数据冲突。
+4. 解释了数据冲突语义的适用范围——除了线程间操作外的操作的语义，如数组长度的读取、检查型转换的执行和虚方法的调用，并不直接受数据竞争的影响。(**仅适用于线程间操作**)
+   
