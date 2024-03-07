@@ -279,6 +279,7 @@ It follows from the above definitions that:
 - The default initialization of any object happens-before any other actions (other than default-writes) of a program.
 3. When a program contains two conflicting accesses (§17.4.1) that are not ordered by a happens-before relationship, it is said to contain a data race.
 4. The semantics of operations other than inter-thread actions, such as reads of array lengths (§10.7), executions of checked casts (§5.5, §15.16), and invocations of virtual methods (§15.12), are not directly affected by data races.
+   Therefore, a data race cannot cause incorrect behavior such as returning the wrong length for an array.
 
 ```
 1. happens-before关系的目的在这句，**happens-before定义何时存在数据冲突**。
@@ -291,4 +292,6 @@ It follows from the above definitions that:
 ```
 3. 说明了数据冲突的定义——当程序存在两个**冲突访问**且没有通过happens-before关系排序，则称为程序存在数据冲突。
 4. 解释了数据冲突语义的适用范围——除了线程间操作外的操作的语义，如数组长度的读取、检查型转换的执行和虚方法的调用，并不直接受数据竞争的影响。(**仅适用于线程间操作**)
+
+
    
