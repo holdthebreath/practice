@@ -293,8 +293,10 @@ It follows from the above definitions that:
 3. 说明了数据冲突的定义——当程序存在两个**冲突访问**且没有通过happens-before关系排序，则称为程序存在数据冲突。
 4. 解释了数据冲突语义的适用范围——除了线程间操作外的操作的语义，如数组长度的读取、检查型转换的执行和虚方法的调用，并不直接受数据竞争的影响。(**仅适用于线程间操作**)
 ```markdown
-A program is correctly synchronized if and only if all sequentially consistent executions are free of data races.
-If a program is correctly synchronized, then all executions of the program will appear to be sequentially consistent (§17.4.3).
+1. A program is correctly synchronized if and only if all sequentially consistent executions are free of data races.
+2. If a program is correctly synchronized, then all executions of the program will appear to be sequentially consistent (§17.4.3).
+This is an extremely strong guarantee for programmers. Programmers do not need to reason about reorderings to determine that their code contains data races. Therefore they do not need to reason about reorderings when determining whether their code is correctly synchronized. Once the determination that the code is correctly synchronized is made, the programmer does not need to worry that reorderings will affect his or her code.
+A program must be correctly synchronized to avoid the kinds of counterintuitive behaviors that can be observed when code is reordered. The use of correct synchronization does not ensure that the overall behavior of a program is correct. However, its use does allow a programmer to reason about the possible behaviors of a program in a simple way; the behavior of a correctly synchronized program is much less dependent on possible reorderings. Without correct synchronization, very strange, confusing and counterintuitive behaviors are possible.
 ```
 这段阐述了程序**正确同步**(correctly synchronized)的定义：
 1. 当且仅当程序所有顺序一致性执行(顺序的集合)不存在数据竞争，程序是正确同步的。
