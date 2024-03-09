@@ -318,5 +318,5 @@ In a happens-before consistent set of actions, each read sees a write that it is
 稍微有点难理解的是这句"Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read."，但我认为也是最快速掌握happens-before实际应用的窍门。
 这句说的是，如果一个读请求和一个写请求在没有happens-before关系**阻止**的情况下，这个读请求是被允许看到这个写请求的结果的。
 比如上面这个例子，假设总的执行顺序是 w -> w' -> r，如果这三个操作互相存在happens-before关系，那么很明显r只能看到w'的结果而看不到w的结果(这就意味着happens-before**阻止**了r看到w的结果(的情况))。但在没有相应的hb关系的情况下，那么r看到w的结果是合法的。
-所以这也给了我们启发，在判断某个读取可能看到的情况时，是不是可以才从happens-before关系阻止(哪些情况)的角度反方面快速判断。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是通过期望判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
+所以这也给了我们启发，在判断某个读取可能看到的情况时，是否可以从happens-before关系阻止(哪些情况)的角度反方面快速判断。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
    
