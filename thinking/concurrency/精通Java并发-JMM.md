@@ -312,11 +312,38 @@ Informally, a read r is allowed to see the result of a write w if there is no ha
 2. A set of actions A is happens-before consistent if for all reads r in A, where W(r) is the write action seen by r, it is not the case that either hb(r, W(r)) or that there exists a write w in A such that w.v = r.v and hb(W(r), w) and hb(w, r).
 In a happens-before consistent set of actions, each read sees a write that it is allowed to see by the happens-before ordering.
 ```
-这段是happens-before的数学化定义，讲解了在某个读请求在什么情况下被允许(is allowed)看到某个写请求(的结果)。
-1. 在实际总顺序的happens-before偏序中(简单理解为有happens-before关系)，且读请求没有被排在这个写请求后面(即需要满足hb(w,r))
-2. 这两者之中没有插入另一个写请求w'(即不存在hb(w', r))
-稍微有点难理解的是这句"Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read."，但我认为也是最快速掌握happens-before实际应用的窍门。
-这句说的是，如果一个读请求和一个写请求在没有happens-before关系**阻止**的情况下，这个读请求是被允许看到这个写请求的结果的。
-比如上面这个例子，假设总的执行顺序是 w -> w' -> r，如果这三个操作互相存在happens-before关系，那么很明显r只能看到w'的结果而看不到w的结果(这就意味着happens-before**阻止**了r看到w的结果(的情况))。但在没有相应的hb关系的情况下，那么r看到w的结果是合法的。
-所以这也给了我们启发，在判断某个读取可能看到的情况时，是否可以从happens-before关系阻止(哪些情况)的角度反方面快速判断。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
-   
+1. 这段是happens-before的数学化定义，讲解了在某个读请求在什么情况下被允许(is allowed)看到某个写请求(的结果)。
+   1. 在实际总顺序的happens-before偏序中(简单理解为有happens-before关系)，且读请求没有被排在这个写请求后面(即需要满足hb(w,r))
+   2. 这两者之中没有插入另一个写请求w'(即不存在hb(w', r))
+   稍微有点难理解的是这句"Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read."，但我认为也是最快速掌握happens-before实际应用的窍门。
+   这句说的是，如果一个读请求和一个写请求在没有happens-before关系**阻止**的情况下，这个读请求是被允许看到这个写请求的结果的。
+   比如上面这个例子，假设总的执行顺序是 w -> w' -> r，如果这三个操作互相存在happens-before关系，那么很明显r只能看到w'的结果而看不到w的结果(这就意味着happens-before**阻止**了r看到w的结果(的情况))。但在没有相应的hb关系的情况下，那么r看到w的结果是合法的。
+   所以这也给了我们启发，在判断某个读取可能看到的情况时，是否可以从happens-before关系阻止(哪些情况)的角度反方面快速判断。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
+2. 第二段是定义什么是happens-before consistent操作集合，其实就是上面两条的数学方式定义全部情况的集合。直接理解描述即可，在happens-before consistent操作集合中，每个读请求都看到它根据happens-before排序被允许看到的写入。
+当然jls这里也有个很好的例子，告诉我们什么是happens-before consistent
+```markdown
+ initially A == B == 0 
+ Thread 1     |   Thread 2 
+    B = 1;    |     A = 2;
+    r2 = A;	  |     r1 = B;
+```
+```markdown
+Since there is no synchronization, **each read can see either the write of the initial value or the write by the other thread**
+```
+1: B = 1;
+3: A = 2;
+2: r2 = A;  // sees initial write of 0
+4: r1 = B;  // sees initial write of 0
+这个情况下符合happens-before consistent，这是很好理解的，
+1: r2 = A;  // sees write of A = 2
+3: r1 = B;  // sees write of B = 1
+2: B = 1;
+4: A = 2;
+在这个情况下，同样符合happens-before consistent，可以细品一下这个例子。
+```markdown
+In this execution, **the reads see writes that occur later in the execution order. This may seem counterintuitive, but is allowed by happens-before consistency**. Allowing reads to see later writes can sometimes produce unacceptable behaviors.
+```
+情况2是如此的令人难以理解，我也不确定自己的理解是否正确。
+发生这种情况，本质的原因是，其实在实际情况下硬件的执行不是(顺序一致的)而是并发的，因此存在后发起的请求先执行完成的情况。
+比如1先发出从主内存读取变量的r2的请求，但是由于某些原因(IO阻塞)，在这等待过程中，后发起的写r2请求先完成了，所以请求1最终读取到了后写入的值。
+还不能理解的话参考上面顺序一致性部分，实现顺序一致性的条件1，关于**发送**的解释，那里的发送是原子性的，这里的发送是非原子性的。
