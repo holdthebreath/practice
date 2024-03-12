@@ -299,8 +299,8 @@ This is an extremely strong guarantee for programmers. Programmers do not need t
 A program must be correctly synchronized to avoid the kinds of counterintuitive behaviors that can be observed when code is reordered. The use of correct synchronization does not ensure that the overall behavior of a program is correct. However, its use does allow a programmer to reason about the possible behaviors of a program in a simple way; the behavior of a correctly synchronized program is much less dependent on possible reorderings. Without correct synchronization, very strange, confusing and counterintuitive behaviors are possible.
 ```
 这段阐述了程序**正确同步**(correctly synchronized)的定义：
-1. 当且仅当程序所有顺序一致性执行(顺序的集合)不存在数据竞争，程序是正确同步的。
-2. 如果程序是正确同步的，那么所有的执行(顺序的集合)表现为顺序一致性。
+1. 当且仅当程序所有顺序一致性执行(操作顺序的集合)不存在数据竞争，程序是正确同步的。
+2. 如果程序是正确同步的，那么所有的执行(操作顺序的集合)表现为顺序一致性。
 下面补充说明了这两条规则，简单概括为：
 **只要正确同步的程序就可以忽略重排序，判断是否正确同步就看程序的实际执行顺序能否表现为顺序一致性，但正确同步的程序并不意味着程序的全部行为是正确的(我理解这里的正确指的是符合我们的期望，比如volatile++是正确同步的，但可能不符合我们期望的正确)，使用正确同步允许我们用简单的判断程序的行为，因为正确同步的程序更少的依赖重排序。**
 在层层铺垫后在这里我们终于得到了如何判断程序是否正确同步的方法，以及如何定义正确同步与程序行为正确的关系——正确同步的程序的行为不一定符合我们的期望，但没有正确同步的程序的行为一定会使我们感到困惑和反直觉。
@@ -312,19 +312,20 @@ Informally, a read r is allowed to see the result of a write w if there is no ha
 2. A set of actions A is happens-before consistent if for all reads r in A, where W(r) is the write action seen by r, it is not the case that either hb(r, W(r)) or that there exists a write w in A such that w.v = r.v and hb(W(r), w) and hb(w, r).
 In a happens-before consistent set of actions, each read sees a write that it is allowed to see by the happens-before ordering.
 ```
+## happens-before consistency
 1. 这段是happens-before的数学化定义，讲解了在某个读请求在什么情况下被允许(is allowed)看到某个写请求(的结果)。
    1. 在实际总顺序的happens-before偏序中(简单理解为有happens-before关系)，且读请求没有被排在这个写请求后面(即需要满足hb(w,r))
    2. 这两者之中没有插入另一个写请求w'(即不存在hb(w', r))
    稍微有点难理解的是这句"Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read."，但我认为也是最快速掌握happens-before实际应用的窍门。
    这句说的是，如果一个读请求和一个写请求在没有happens-before关系**阻止**的情况下，这个读请求是被允许看到这个写请求的结果的。
-   比如上面这个例子，假设总的执行顺序是 w -> w' -> r，如果这三个操作互相存在happens-before关系，那么很明显r只能看到w'的结果而看不到w的结果(这就意味着happens-before**阻止**了r看到w的结果(的情况))。但在没有相应的hb关系的情况下，那么r看到w的结果是合法的。
-   所以这也给了我们启发，在判断某个读取可能看到的情况时，是否可以从happens-before关系阻止(哪些情况)的角度反方面快速判断。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
+   比如上面这个例子，如果这三个操作互相存在happens-before关系，即w -> w' -> r(->是hb关系的符号)，那么很明显r只能看到w'的结果而看不到w的结果(这就意味着happens-before**阻止**了r看到w的结果(的情况))。但在没有相应的hb关系的情况下，那么r看到w的结果是合法的。
+   所以这也给了我们启发，**在判断某个读取可能看到的情况时，可以从happens-before关系阻止(看到哪些情况)的角度反方面快速判断**。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
 2. 第二段是定义什么是happens-before consistent操作集合，其实就是上面两条的数学方式定义全部情况的集合。直接理解描述即可，**在happens-before consistent操作集合中，每个读请求都看到它根据happens-before排序被允许看到的写入。**
 当然jls这里也有个很好的例子，告诉我们什么是happens-before consistent
 ```markdown
  initially A == B == 0 
- Thread 1     |   Thread 2 
-    B = 1;    |     A = 2;
+ Thread 1         |   Thread 2 
+    B = 1;        |     A = 2;
     r2 = A;	  |     r1 = B;
 ```
 ```markdown
