@@ -282,7 +282,7 @@ It follows from the above definitions that:
    Therefore, a data race cannot cause incorrect behavior such as returning the wrong length for an array.
 
 ```
-1. happens-before关系的目的在这句，**happens-before定义何时存在数据冲突**。
+1. happens-before关系的目的在这句，**happens-before定义何时存在数据竞争**。
 2. 这段有两个术语，充分的(sufficient)/传递闭包(transitive closure)，读起来不直观，然后我就问了GPT。(当然应该是自己不懂图论)
 ```markdown
 传递闭包（Transitive Closure）在这个上下文中，是指从一组同步边（Synchronization Edges）出发，通过递归地应用传递性（如果A happens-before B，且B happens-before C，则A happens-before C），来获得所有可能的 happens-before 关系的集合。这个概念来自图论，其中**传递闭包用于找到图中所有可达的顶点对。**
@@ -290,8 +290,8 @@ It follows from the above definitions that:
 如果你能够通过这组同步边 S 和程序的执行顺序，推导出执行中所有可能的 happens-before 关系（即，没有额外的 happens-before 关系可以被推导出，但未被 S 捕捉），那么我们说这组同步边 S 是充分的（Sufficient）。
 简单来说，在这个上下文中，传递闭包就是通过不断应用 happens-before 的定义，找到所有间接的 happens-before 关系，确保能覆盖程序执行中所有可能的 happens-before 关系。这是确保程序正确同步的一个关键步骤，因为它涵盖了所有必须被同步的操作，以避免数据竞争和其他并发问题。
 ```
-3. 说明了数据冲突的定义——当程序存在两个**冲突访问**且没有通过happens-before关系排序，则称为程序存在数据冲突。
-4. 解释了数据冲突语义的适用范围——除了线程间操作外的操作的语义，如数组长度的读取、检查型转换的执行和虚方法的调用，并不直接受数据竞争的影响。(**仅适用于线程间操作**)
+3. 说明了数据竞争的定义——当程序存在两个**冲突访问**且没有通过happens-before关系排序，则称为程序存在数据竞争。
+4. 解释了数据竞争语义的适用范围——除了线程间操作外的操作的语义，如数组长度的读取、检查型转换的执行和虚方法的调用，并不直接受数据竞争的影响。(**仅适用于线程间操作**)
 ```markdown
 1. A program is correctly synchronized if and only if all sequentially consistent executions are free of data races.
 2. If a program is correctly synchronized, then all executions of the program will appear to be sequentially consistent (§17.4.3).
