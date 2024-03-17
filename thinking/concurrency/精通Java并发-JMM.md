@@ -191,9 +191,15 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 总结，**只要每个线程的操作的执行顺序，满足该线程程序顺序，即执行顺序符合1->2->3，两个线程任意实际总顺序都是符合顺序一致性的。**
 
 ##### 三种顺序概念整理
-1. execution order：执行顺序，指程序实际执行操作的顺序。
-2. order of program：程序的顺序，我们写代码时的先后顺序，体现了我们期望线程实现什么样的行为。
-3. program order：程序顺序，符合单线程语义的顺序(单线程上下文下线程的行为可以完全预测)。反过来说，**只要线程的行为是符合单线程语义，那么任何执行顺序都是合法的(重排序)**。可以简单理解为，**program order是一种约束规则，使线程在效果上表现为按照order of program进行执行**。所以从结果角度可以简单认为program order就是order of program，但要清楚两者具体含义并不相同。
+1. execution order：(程序的)执行顺序，指**程序实际执行操作的顺序，是程序全部操作的总排序**。
+2. order of program：(线程的)程序的顺序，我们写代码时的先后顺序，体现了我们期望线程实现什么样的行为。
+3. program order：(线程的)程序顺序，指**线程**符合单线程语义的**实际执行**的顺序(在单线程上下文中线程的行为可以完全预测)。反过来说，**只要线程的行为是符合单线程语义，那么任何实际执行顺序都是合法的(重排序)**。可以简单理解为，**program order是一种约束规则，使线程在单线程执行效果上表现为按照order of program进行执行**。所以从单线程结果角度可以简单认为program order就是order of program，但要清楚两者具体含义并不相同。
+补充说明：
+- 具体点说，所谓的单线程上下文中线程行为可以完全预测，指的是在单线程上下文中，通过每个读看到的值，预测线程的执行结果，**注意这里并没有谈及看到值的正确性问题，可能是因为在单线程语义下并不存在**。因此程序一定遵守单线程语义(我认为本质的原因是现代cpu一定遵守单线程语义，这是由底层决定的)，与其他概念(比如正确同步)不相干，从概念上来说，有点像正确的废话。
+- 从线程执行的结果看，**单线程上下文中**program order的执行结果与order of program执行一致，同样这里**没有任何正确性相关的概念**
+- 从概念上区分，program order是符合单线程语义的**该线程的实际**执行顺序，而order of program是编写顺序。由于重排序的存在，**program order在事实上是动态的，而很显然order of program是静态的，这意味着单线程由于program order形成的happens-before关系也是动态的**。
+
+核心点在于，注意区分**正确性与程序执行结果**的概念区分，这里的正确性指的是原子操作读下我们预期看到的值的正确性，而非程序并发编程下的正确性(这个会存在多原子操作需不需要原子执行的情况)。
 
 当理解了这一点，我们就可以一目了然的发现核心关键——**实际执行的具体线程的调度其实没有任何约束**。
 从这里，我们隐隐约约感觉到，好像已经摸索到实际会出现并发相关问题的本质原因了——**对线程进行任意调度执行都是合法的**。
@@ -216,7 +222,7 @@ Every execution has a synchronization order.
 A synchronization order is a total order over all of the synchronization actions of an execution. 
 For each thread t, the synchronization order of the synchronization actions (§17.4.2) in t is consistent with the program order (§17.4.3) of t.
 ```
-这段说明了什么是同步顺序——同步顺序是执行全部**同步操作**的总排序。不过最重要的是最后一句，针对每个线程，**线程的同步顺序与程序顺序一致**。
+这段说明了什么是同步顺序——同步顺序是程序(某次实际)执行的全部**同步操作**的总排序。不过最重要的是最后一句，针对每个线程，**线程的同步顺序与程序顺序一致**。
 ```markdown
 - Synchronization actions induce the synchronized-with relation on actions, defined as follows:
 1. An unlock action on monitor m synchronizes-with all subsequent lock actions on m (where "subsequent" is defined according to the synchronization order).
@@ -255,7 +261,7 @@ If we have two actions x and y, we write hb(x, y) to indicate that x happens-bef
 如果已经对happens-before有深刻理解，只是想了解规范如何定义整套规则的，那么只需要看这段就足够了。
 - 两个操作可以通过happens-before排序。如果一个操作happens-before另一个，则第一个操作对第二个操作是可见的，并且在第二个操作之前发生。
 接下来列的是4条规则，没错，实际的happens-before只需要4条，前提是我们明白什么是synchronizes-with关系。
-总结而言，**单线程的操作happens-before基于程序顺序，多线程的happens-before基于synchronizes-with，happens-before具有传递性**。
+总结而言，**单线程操作的happens-before基于程序顺序，多线程操作的happens-before基于synchronizes-with，happens-before具有传递性**。
 我想经过上面的“训练”，已经形成条件反射了——法无禁即自由。对没错，任意两个操作如果没有happens-before关系，则发生顺序与可见性完全没有约束，一切都是合法的。
 ```markdown
 1. The wait methods of class Object (§17.2.1) have lock and unlock actions associated with them; their happens-before relationships are defined by these associated actions.
@@ -351,3 +357,9 @@ In this execution, **the reads see writes that occur later in the execution orde
 比如1先发出从主内存读取变量的r2的请求，但是由于某些原因(IO阻塞)，在这等待过程中，后发起的写r2请求先完成了，所以请求1最终读取到了后写入的值。
 还不能理解的话参考上面顺序一致性部分，实现顺序一致性的条件1，关于**发送**的解释，那里的发送是原子性的，这里的发送是非原子性的。
 当然这个是实际发生这种情况的猜测，通过这个例子我认为想表述的是，**只要没有明确的happens-before关系，那么跨线程的读取看到任何写操作都是合法的，这个操作集合就是happens-before consistency的**。
+结合jls学术性的看这个例子，推理逻辑大概是这样：
+1. 整体背景：程序每个线程必须符合单线程语义(“特殊情况”为有些读取操作看到的值需要由JMM确认)
+2. 程序顺序：线程的程序顺序是该线程全部线程间操作基于单线程语义实际执行的顺序
+3. 推理规则：单线程操作的happens-before基于程序顺序，多线程操作的happens-before基于synchronizes-with，happens-before具有传递性
+在这个例子中，两个线程的**程序顺序**分别为，(1 -> 3)和(2 -> 4)，即hb(1, 3)和hb(2, 4)，但由于没有**正确同步**(程序存在**数据竞争**)，因此程序不会表现出**顺序一致性**。具体点说，**线程间操作**1和2读取的值是共享变量，因此具体看到的值应该由JMM确定，而两个线程没有**同步操作**，因此不存在**synchronized-with**关系，所以没有hb关系，所以两个线程读取操作看到任意值都是合法的。 
+加粗的全部为概念，可以回忆梳理下。
