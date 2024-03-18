@@ -167,7 +167,7 @@ How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Progr
     A1    |     B1 
     A2    |     B2
     A3    |     B3
-假设有两个线程T1和T2，他们的操作分别为A和B，依赖关系为3->2->1(这里是必须的，否则不能体现线程内语义)
+假设有两个线程T1和T2，他们的操作分别为A和B，依赖关系为3->2->1(简化一下下文模型的理解，如果没有依赖关系，123的操作将被允许全部重排序)
 顺序一致性模型的图：
 ------    ------
 | T1 |    | T2 |
