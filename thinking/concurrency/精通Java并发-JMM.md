@@ -145,11 +145,11 @@ JLS 17.4.3
 ```markdown
 1. A high-speed **processor may execute operations in a different order than is specified by the program.** 
    The correctness of the execution is guaranteed if the processor satisfies the following condition: 
-   **the result of an execution is the same as if the operations had been executed in the order specified by the program.**
+2. **the result of an execution is the same as if the operations had been executed in the order specified by the program.**
    A processor satisfying this condition will be called sequential.
-2. **the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program.**
+3. **the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program.**
    A multiprocessor satisfying this condition will be called sequentially consistent. 
-   **The sequentiality of each individual processor does not guarantee that the multi-processor computer is sequentially consistent.**
+4. **The sequentiality of each individual processor does not guarantee that the multi-processor computer is sequentially consistent.**
 
 How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs
 ```
@@ -158,8 +158,18 @@ How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Progr
 3. 多核处理器如果任何(实际)执行(顺序)的结果与所有处理器的操作以顺序性(sequential)方式执行相同，并且每个单独处理器的操作以其程序指定的顺序出现，则称这个多核处理器是顺序一致的。
 4. 每个单核具有顺序性并不能保证多核具有顺序一致性
 第4点是这篇论文讨论的核心，不过与我们理解顺序一执行模型并不相关，就不展开了。核心点是多核实现顺序一致性需要满足两个条件：
-1. 每个处理器**发送**(issue)(这里的发送并不是执行的概念，注意含义区别，其实暗含了执行原子性实现写请求对后续操作可见)内存请求的顺序与程序定义的顺序相同
-2. 所有处理器向单个内存模块**发送**的内存请求进入单个FIFO队列(已内存模块为维度的队列)进行顺序执行。**发送**内存请求的顺序与进入队列的顺序一致。
+- 每个处理器**发送**(issue)(这里的发送并不是执行的概念，注意含义区别，其实暗含了执行原子性实现写请求对后续操作可见)内存请求的顺序与**程序定义的顺序**相同
+- 所有处理器向单个内存模块**发送**的内存请求进入单个FIFO队列(已内存模块为维度的队列)进行顺序执行。**发送**内存请求的顺序与进入队列的顺序一致。
+##### 论文的思考
+在这篇论文里，注意一个点是**明确要求cpu发送内存请求按照的是程序的顺序(而非程序顺序)，是不是和JLS上面定义的有冲突？**
+这里我的思考是(**仅是个人观点，不确保正确**)：
+1. 从JMM的设计思想看，毫无疑问采用顺序一致性模型将会禁止大量重排序，正如下文所说，是非常强的内存模型保证但降低了性能，所以JMM并没有直接采用。
+2. 基于1的基础上，JMM需要成为相对宽松的模型，实现性能和正确性的平衡，因此抽象出了program order概念，允许了单线程的重排序。
+3. 顺序一致性毫无疑问也是程序员在判断程序并发执行是否符合预期相对容易使用和理解的模型，因此在基于2的基础上，JMM最终定义了**正确同步**的程序将会表现为顺序一致性(相关定义见下文)。这里是个人猜测为什么JMM这么设计的相关思路。
+4. 从出发点的角度看，正如论文标题，兰神的论文说的是多核计算机如何实现正确执行多进程程序，目的是定义一套理想化的底层内存模型实现正确的执行结果，因此侧重点在于基于cpu和内存的实际交互情况进行抽象，事实上提供了多核正确执行多进程的方案(可以理解为，只要按照顺序一致性方式执行，程序结果就是正确的)
+5. JMM是程序语言的约束，作为一种高级语言相当于是硬件层抽象的抽象(运行在JVM中)，他本身还会有其他的重排序(编译器/运行时)，侧重点在于为Java使用者提供一套屏蔽底层细节的视图，所以与顺序一致性从定义上看就是两个层面的内存模型。而程序也毫无疑问需要正确并发执行，实现这个目标的途径就是通过各种手段使程序**正确同步**，最终表现为顺序一致性。
+6. 因此其实两个模型关于顺序一致性的定义略有不同，但本质上说的是同一个东西，区别在于，不同的侧重点导致了不同的定义(JMM的定义包含了program order的概念)。
+当然上面的正确性同样没有包含多个原子操作需要为一个原子组的那种程序正确性。
 
 这个是巨佬的论文定义，我们通过下面的图快速理解这个模型：
 ```markdown
@@ -167,7 +177,7 @@ How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Progr
     A1    |     B1 
     A2    |     B2
     A3    |     B3
-假设有两个线程T1和T2，他们的操作分别为A和B，依赖关系为3->2->1(简化一下下文模型的理解，如果没有依赖关系，123的操作将被允许全部重排序)
+假设有两个线程T1和T2，他们的操作分别为A和B
 顺序一致性模型的图：
 ------    ------
 | T1 |    | T2 |
@@ -179,7 +189,7 @@ How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Progr
   -------------
 ```
 大致的结构类似这样，最终**通过内存开关连接不同的线程使两个线程的操作具有全局的一个顺序性，也因此具有每个写操作的结果对后续操作读可见特性。**
-还不够清晰的话，可以**想象现在我们的左右手(每个线程)各有一堆牌(某次重排序后符合单线程语义的一系列操作)，然后将他们交错互相插入最终形成一堆牌(程序执行两个线程全部操作的总顺序)。**
+还不够清晰的话，可以**想象现在我们的左右手(每个线程)各有一堆牌(一系列操作)，然后将他们交错互相插入最终形成一堆牌(程序执行两个线程全部操作的总顺序)。**
 举几个例子
 ```markdown
 A1 -> B1 -> A2 -> B2 -> A3 -> B3
