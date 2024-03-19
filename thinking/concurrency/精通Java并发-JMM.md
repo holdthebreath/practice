@@ -4,6 +4,18 @@
 阅前必读：
 本文核心内容来自SE8的Java Language Specification(https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4.2)，
 包含原文及个人理解，不一定完全正确，如有疑问欢迎讨论及自行探讨。
+
+# memory consistency model
+作为一切的开头，如果是和我一样在此之前对内存模型没有概念的，强烈推荐阅读下面这篇Tutorial，当作下面的知识背景。
+https://www.cs.utexas.edu/~bornholt/post/memory-models.html (~~真学CS还得看老外~~)
+
+```markdown
+A memory consistency model is a **contract** between the hardware and software. The hardware promises to only reorder operations in ways allowed by the model, and in return, the software acknowledges that all such reorderings are possible and that it needs to account for them.
+```
+contract，如此简洁准确而又优雅的描述，看到这句描述有种振聋发聩的美感。
+1. 硬件承诺只重排序内存模型允许的方式进行重排序
+2. 软件承认所有此类重排序都是可能的，并且需要考虑他们
+
 # 什么是Java Memory Model
 JLS 17.4
 ```markdown
@@ -134,16 +146,6 @@ JLS 17.4.3
 第2段这里更是重量级！更是言简意赅凝练到了极致。
 首先翻译一下，**如果所有（线程的线程间）操作发生的总顺序（执行顺序）与程序顺序一致，则这组操作具有顺序一致性**，后面的这段我理解是讲解顺序一致性模型的特点的。
 所以理解这段话我们得首先弄明白什么是顺序一致性模型，当然对于菜鸟的我，还需要再首先一下，什么是内存模型？(memory model)
-
-#### memory consistency model
-在网上搜了很多资料，都是零散如八股文一般，这篇我觉得是最好的 https://www.cs.utexas.edu/~bornholt/post/memory-models.html (~~真学CS还得看老外~~)
-
-```markdown
-A memory consistency model is a **contract** between the hardware and software. The hardware promises to only reorder operations in ways allowed by the model, and in return, the software acknowledges that all such reorderings are possible and that it needs to account for them.
-```
-contract，如此简洁准确而又优雅的描述，看到这句描述有种振聋发聩的美感。
-1. 硬件承诺只重排序内存模型允许的方式进行重排序
-2. 软件承认所有此类重排序都是可能的，并且需要考虑他们
 
 #### 顺序一致性模型
 来自维基百科 https://en.wikipedia.org/wiki/Sequential_consistency
