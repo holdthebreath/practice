@@ -133,7 +133,18 @@ JLS 17.4.3
 ### 顺序一致性(模型)
 第2段这里更是重量级！更是言简意赅凝练到了极致。
 首先翻译一下，**如果所有（线程的线程间）操作发生的总顺序（执行顺序）与程序顺序一致，则这组操作具有顺序一致性**，后面的这段我理解是讲解顺序一致性模型的特点的。
-所以理解这段话我们得首先弄明白什么是顺序一致性模型。
+所以理解这段话我们得首先弄明白什么是顺序一致性模型，当然对于菜鸟的我，还需要再首先一下，什么是内存模型？(memory model)
+
+#### memory consistency model
+在网上搜了很多资料，都是零散如八股文一般，这篇我觉得是最好的 https://www.cs.utexas.edu/~bornholt/post/memory-models.html (~~真学CS还得看老外~~)
+
+```markdown
+A memory consistency model is a **contract** between the hardware and software. The hardware promises to only reorder operations in ways allowed by the model, and in return, the software acknowledges that all such reorderings are possible and that it needs to account for them.
+```
+contract，如此简洁准确而又优雅的描述，看到这句描述有种振聋发聩的美感。
+1. 硬件承诺只重排序内存模型允许的方式进行重排序
+2. 软件承认所有此类重排序都是可能的，并且需要考虑他们
+
 #### 顺序一致性模型
 来自维基百科 https://en.wikipedia.org/wiki/Sequential_consistency
 ```markdown
@@ -219,7 +230,7 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 3. Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
 4. If we were to use sequential consistency as our memory model, many of the compiler and processor optimizations that we have discussed would be illegal.
 ```
-1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的执行顺序的保证。在顺序一致性模型内执行，每个独立的操作都具有原子性而且总执行顺序符合**程序顺序**，以及每个独立操作具有原子性并对所有线程立即可见。
+1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的执行顺序的保证。在顺序一致性模型内执行，每个独立的操作都具有原子性而且总执行顺序符合**程序的顺序**，以及每个独立操作具有原子性并对所有线程立即可见。
 2. 总结顺序一致性和Java程序的关系——如果程序没有**数据竞争**，程序的全部操作执行（的效果）**表现的像顺序一致性**。
 3. 顺序一致性模型的职责范围——无论是否存在数据竞争，都仍然**允许由一系列操作需要原子性（而实际没有）引发错误**。
 这里根据上面的例子可以很好理解，意思是假设线程的结果必须要求依赖(1->2->3)三个操作为原子执行(中间不能穿插另一个线程的操作)，那么顺序一致性是允许这种情况出现错误。（因为顺序一致性模型并不具有多个操作原子性的保证）。从本质上来看，这种情况下**线程结果的正确性依赖了特定的线程调度顺序（竞态条件），而正如上文所说，对线程的调度不会存在任何约束。**
