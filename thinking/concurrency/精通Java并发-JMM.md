@@ -214,7 +214,7 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 根据反证法，因为没有volatile的结果是错误的，所以我们的假设是不成立，那么我认为唯一合理的解释是
 **程序顺序在Java里的本质理解，是经过(指令重排序后)程序指令的的顺序**。
 
-当理解了这一点，我们就可以一目了然的发现核心关键——**实际执行时具体线程的调度其实没有任何约束吗，对线程进行任意调度执行都是合法的**。
+当理解了这一点，我们就可以一目了然的发现核心关键——**实际执行时具体线程的调度其实没有任何约束，对线程进行任意调度执行都是合法的**。
 
 ```markdown
 1. Sequential consistency is a very strong guarantee that is made about visibility and ordering in an execution of a program. Within a sequentially consistent execution, there is a total order over all individual actions (such as reads and writes) which is consistent with the order of the program, and each individual action is atomic and is immediately visible to every thread.
