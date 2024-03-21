@@ -5,7 +5,7 @@
 本文核心内容来自SE8的Java Language Specification(https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4.2)，
 包含原文及个人理解，不一定完全正确，如有疑问欢迎讨论及自行探讨。
 
-# memory consistency model
+# Memory (consistency) Model
 作为一切的开头，如果是和我一样在此之前对内存模型没有概念的，强烈推荐阅读下面这篇Tutorial，当作下面的知识背景。
 https://www.cs.utexas.edu/~bornholt/post/memory-models.html (~~真学CS还得看老外~~)
 
