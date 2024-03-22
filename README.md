@@ -6,4 +6,7 @@
 
 https://mp.weixin.qq.com/s?__biz=MzA4NTg1MjM0Mg==&mid=2657261357&idx=1&sn=ebb11a1623e00ca8e6ad55c9ad6b2547#rd
 
-感谢以及RIP 左耳听风 同样给了我很大的启发
+感谢以及RIP 左耳听风 同样给了我很大的启发。
+操作/知识/经验/能力，毫无疑问需要**学习知识培养能力**。
+
+https://coolshell.cn/articles/4506.html
