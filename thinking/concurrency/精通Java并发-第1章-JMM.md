@@ -376,3 +376,19 @@ In this execution, **the reads see writes that occur later in the execution orde
 3. 推理规则：单线程操作的happens-before基于程序顺序，多线程操作的happens-before基于synchronizes-with，happens-before具有传递性
 在这个例子中，两个线程的**程序顺序**分别为，(1 -> 3)和(2 -> 4)，即hb(1, 3)和hb(2, 4)，但由于没有**正确同步**(程序存在**数据竞争**)，因此程序不会表现出**顺序一致性**。
 具体点说，**线程间操作**1和2读取的值是**共享变量**，因此具体看到的值应该由JMM确定，而两个线程针对同一个**共享变量**的读/写没有**同步操作**，因此这两个操作不存在**synchronized-with**关系，在情况2这样的**执行顺序**下，不存在相应的**happens-before order关系阻止**读看到写的结果(所以操作集依然是happens-before consistency)，因此JMM认为是合法的。程序存在**数据竞争**不是**正确同步**，将不会表现为**顺序一致性**。
+
+# Executions 执行
+```markdown
+An execution E is described by a tuple <P, A, po, so, W, V, sw, hb>, comprising:
+- P - a program
+- A - a set of actions
+- po - program order, which for each thread t, is a total order over all actions performed by t in A
+- so - synchronization order, which is a total order over all synchronization actions in A
+- W - a write-seen function, which for each read r in A, gives W(r), the write action seen by r in E.
+- V - a value-written function, which for each write w in A, gives V(w), the value written by w in E.
+- sw - synchronizes-with, a partial order over synchronization actions
+- hb - happens-before, a partial order over actions
+Note that the synchronizes-with and happens-before elements are uniquely determined by the other components of an execution and the rules for well-formed executions (§17.4.7).
+An execution is happens-before consistent if its set of actions is happens-before consistent (§17.4.5).
+```
+这章可说的不多，定义了用符号表示执行的概念，E = <P, A, po, so, W, V, sw, hb>，执行指的是程序执行。
