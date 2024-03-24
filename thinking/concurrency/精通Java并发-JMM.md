@@ -336,9 +336,10 @@ In a happens-before consistent set of actions, each read sees a write that it is
    所以这也给了我们启发，**在判断某个读取可能看到的情况时，可以从happens-before关系阻止(看到哪些情况)的角度反方面快速判断**。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
 2. 第二段是定义什么是happens-before consistent操作集合，其实就是上面两条的数学方式定义全部情况的集合。
    - 操作集合A中如果全部的读r，看到的写W(r)
-   - **既不存在**hb(r, W(r))(没有违反hb关系看到未来的写)**也不存在**针对同一个共享变量v的另一个写请求w有hb(W(r), w)和hb(w, r)(没有违反hb关系没看到最新的写)
+   - **既不存在**hb(r, W(r))(没有违反hb关系看到未来的写)**也不存在**针对同一个共享变量v的另一个写请求w有hb(W(r), w)和hb(w, r)(没有违反hb关系看到过时的写)
    - 则这个操作集合是happens-before consistent的
 **在happens-before consistent操作集合中，每个读请求都看到它根据happens-before排序被允许看到的写入。**
+需要注意这里集合判断是否符合happens-before consistent是**必须基于有hb关系**。
 当然jls这里也有个很好的例子，告诉我们什么是happens-before consistent
 ```markdown
  initially A == B == 0 
@@ -374,4 +375,4 @@ In this execution, **the reads see writes that occur later in the execution orde
 2. 程序顺序：线程的程序顺序是该线程全部线程间操作基于单线程语义将被执行的顺序
 3. 推理规则：单线程操作的happens-before基于程序顺序，多线程操作的happens-before基于synchronizes-with，happens-before具有传递性
 在这个例子中，两个线程的**程序顺序**分别为，(1 -> 3)和(2 -> 4)，即hb(1, 3)和hb(2, 4)，但由于没有**正确同步**(程序存在**数据竞争**)，因此程序不会表现出**顺序一致性**。
-具体点说，**线程间操作**1和2读取的值是**共享变量**，因此具体看到的值应该由JMM确定，而两个线程针对同一个**共享变量**的读/写没有**同步操作**，因此这两个操作不存在**synchronized-with**关系，在情况2这样的**执行顺序**下，不存在相应的**happens-before order关系阻止**读看到写的结果(happens-before consistency)，因此JMM认为是合法的。程序存在**数据竞争**不是**正确同步**，将不会表现为**顺序一致性**。
+具体点说，**线程间操作**1和2读取的值是**共享变量**，因此具体看到的值应该由JMM确定，而两个线程针对同一个**共享变量**的读/写没有**同步操作**，因此这两个操作不存在**synchronized-with**关系，在情况2这样的**执行顺序**下，不存在相应的**happens-before order关系阻止**读看到写的结果(所以操作集依然是happens-before consistency)，因此JMM认为是合法的。程序存在**数据竞争**不是**正确同步**，将不会表现为**顺序一致性**。
