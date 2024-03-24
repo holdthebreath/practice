@@ -410,3 +410,58 @@ We only consider well-formed executions. An execution E = < P, A, po, so, W, V, 
 ```
 1. 这里定义了什么是正确构造(well-formed)的执行，严谨。
 2. We only consider well-formed executions.意味我们程序的所有执行都是正确构造的(当然如此)，严谨。
+#  Executions and Causality Requirements
+jls 17.4.8
+```markdown
+1. A well-formed execution E = < P, A, po, so, W, V, sw, hb > is validated by committing actions from A. If all of the actions in A can be committed, then the execution satisfies the causality requirements of the Java programming language memory model.
+Starting with the empty set as C0, we perform a sequence of steps where we take actions from the set of actions A and add them to a set of committed actions Ci to get a new set of committed actions Ci+1. To demonstrate that this is reasonable, for each Ci we need to demonstrate an execution E containing Ci that meets certain conditions.
+Formally, an execution E satisfies the causality requirements of the Java programming language memory model if and only if there exist:
+- Sets of actions C0, C1, ... such that:
+  - C0 is the empty set
+  - Ci is a proper subset of Ci+1
+  - A = ∪ (C0, C1, ...)
+  If A is finite, then the sequence C0, C1, ... will be finite, ending in a set Cn = A.
+  If A is infinite, then the sequence C0, C1, ... may be infinite, and it must be the case that the union of all elements of this infinite sequence is equal to A.
+- Well-formed executions E1, ..., where Ei = < P, Ai, poi, soi, Wi, Vi, swi, hbi >.
+Given these sets of actions C0, ... and executions E1, ... , every action in Ci must be one of the actions in Ei.
+```
+**正确构造的执行通过提交(committing)操作集合A中的操作(actions)进行校验，如果A中全部的操作都可以被提交，则说明这个执行满足(satisfies)JMM因果依赖(causality requirements of the Java programming language memory model)**。
+定义了如何校验某个执行是否是正确构造的，以及新增一个概念，**因果依赖**。
+原文下面是每一步提交操作集合(Ci)相关规则正式的(Formally)的定义，目前感觉自己理解的也未必很准确，建议直接翻原文。
+不过可以通过jls的例子，明白这个因果依赖是什么意思。
+```markdown
+Happens-before consistency is a necessary, but not sufficient, set of constraints. Merely enforcing happens-before consistency would allow for unacceptable behaviors - those that violate the requirements we have established for programs. For example, happens-before consistency allows values to appear "out of thin air". This can be seen by a detailed examination of the trace in Table 17.4.8-A.
+Table 17.4.8-A. Happens-before consistency is not sufficient
+
+Thread 1               |   Thread 2
+r1 = x;                |     r2 = y;
+if (r1 != 0) y = 1;    |     if (r2 != 0) x = 1;
+
+The code shown in Table 17.4.8-A is correctly synchronized. This may seem surprising, since it does not perform any synchronization actions. Remember, however, that a program is correctly synchronized if, when it is executed in a sequentially consistent manner, there are no data races. If this code is executed in a sequentially consistent way, each action will occur in program order, and neither of the writes will occur. Since no writes occur, there can be no data races: the program is correctly synchronized.
+Since this program is correctly synchronized, the only behaviors we can allow are sequentially consistent behaviors. However, there is an execution of this program that is happens-before consistent, but not sequentially consistent:
+r1 = x;  // sees write of x = 1
+y = 1;
+r2 = y;  // sees write of y = 1
+x = 1;
+This result is happens-before consistent: there is no happens-before relationship that prevents it from occurring. However, it is clearly not acceptable: there is no sequentially consistent execution that would result in this behavior. The fact that we allow a read to see a write that comes later in the execution order can sometimes thus result in unacceptable behaviors.
+Although allowing reads to see writes that come later in the execution order is sometimes undesirable, it is also sometimes necessary. As we saw above, the trace in Table 17.4.5-A requires some reads to see writes that occur later in the execution order. Since the reads come first in each thread, the very first action in the execution order must be a read. If that read cannot see a write that occurs later, then it cannot see any value other than the initial value for the variable it reads. This is clearly not reflective of all behaviors.
+We refer to the issue of when reads can see future writes as causality, because of issues that arise in cases like the one found in Table 17.4.8-A. In that case, the reads cause the writes to occur, and the writes cause the reads to occur. There is no "first cause" for the actions. Our memory model therefore needs a consistent way of determining which reads can see writes early.
+Examples such as the one found in Table 17.4.8-A demonstrate that the specification must be careful when stating whether a read can see a write that occurs later in the execution (bearing in mind that if a read sees a write that occurs later in the execution, it represents the fact that the write is actually performed early).
+The memory model takes as input a given execution, and a program, and determines whether that execution is a legal execution of the program. It does this by gradually building a set of "committed" actions that reflect which actions were executed by the program. Usually, the next action to be committed will reflect the next action that can be performed by a sequentially consistent execution. However, to reflect reads that need to see later writes, we allow some actions to be committed earlier than other actions that happen-before them.
+Obviously, some actions may be committed early and some may not. If, for example, one of the writes in Table 17.4.8-A were committed before the read of that variable, the read could see the write, and the "out-of-thin-air" result could occur. Informally, we allow an action to be committed early if we know that the action can occur without assuming some data race occurs. In Table 17.4.8-A, we cannot perform either write early, because the writes cannot occur unless the reads see the result of a data race.
+```
+我认为这个例子就是JMM规则的综合应用，建议细品。
+这个例子有几个注意点：
+1. 核心结论：**Happens-before consistency is a necessary, but not sufficient, set of constraints. Merely enforcing happens-before consistency would allow for unacceptable behaviors - those that violate the requirements we have established for programs. For example, happens-before consistency allows values to appear "out of thin air".**
+2. 程序是正确同步的，原因是以顺序一致性的方式执行不存在写操作，没有数据冲突。
+3. 但这个例子不符合上文的第二条，正确同步的程序应该只表现为顺序一致性，而程序存在下面的情况，是不符合顺序一致性的。(there is an execution of this program **that is happens-before consistent, but not sequentially consistent**)
+4. This result is happens-before consistent: **there is no happens-before relationship that prevents it from occurring.** However, it is clearly not acceptable: there is no sequentially consistent execution that would result in this behavior. The fact that we allow a read to see a write that comes later in the execution order can sometimes thus result in unacceptable behaviors.
+5. bearing in mind that **if a read sees a write that occurs later in the execution, it represents the fact that the write is actually performed early**
+6. The memory model takes as input a given execution, and a program, and determines whether that execution is a legal execution of the program. It does this by gradually building a set of "committed" actions that reflect which actions were executed by the program. Usually, the next action to be committed will reflect the next action that can be performed by a sequentially consistent execution. However, to reflect reads that need to see later writes, we allow some actions to be committed earlier than other actions that happen-before them.
+综上，这个例子就是为了说明Happens-before consistency是必要的(necessary)但并不充分(sufficient)，只有这个会导致问题，比如凭空出现(out of thin air)。
+当然在结尾也说，JMM不会允许这种情况出现。因此，我个人理解，JMM的实际规则是：
+   **Happens-before consistency + causality requirements**
+
+
+
+
