@@ -391,4 +391,4 @@ An execution E is described by a tuple <P, A, po, so, W, V, sw, hb>, comprising:
 Note that the synchronizes-with and happens-before elements are uniquely determined by the other components of an execution and the rules for well-formed executions (§17.4.7).
 An execution is happens-before consistent if its set of actions is happens-before consistent (§17.4.5).
 ```
-这章可说的不多，定义了用符号表示执行的概念，E = <P, A, po, so, W, V, sw, hb>，执行指的是程序执行。
+这章可说的不多，定义了用符号表示执行的概念，E = <P, A, po, so, W, V, sw, hb>，如果操作集是happens-before consistency的，则执行也是。
