@@ -135,17 +135,17 @@ JLS 17.4.3
 这段话是寥寥几句，但为精髓中的精髓。为什么这么说呢，因为在著名并发相关的《Java并发编程的艺术》一书中涉及到了这块知识，但直到我看到JLS，我才发现以前自己看那本书得到相关知识的理解是错误的。
 让我们来逐字逐句推敲一下这段话。
 ### 程序顺序 
-第一句就显得有一点云遮雾障，核心其实就是在说什么是程序顺序(program order)——在每个线程执行的所有**线程间操作**中，程序顺序是反映根据**t的线程内语义将被执行**(would be performed)这些操作的顺序的总顺序。
+第一句就显得有一点云遮雾障，核心其实就是在说什么是程序顺序(program order)——在每个线程执行的所有**线程间操作**中，程序顺序是反映根据**t的线程内语义将被执行**(would be performed)这些操作的顺序的**全序**。
 当然我相信这样翻译还是有点抽象，更具体一点来说。首先基于上文我们已知
 1. 所有线程操作分为两类，分别是线程间和线程内操作。
 2. 线程内操作满足线程内语义
 由此可以看出，而线程间操作是在之前是没有规范的，而没有规范就意味无法预测结果，所以需要增加这一规则进行约束。
-总结一下，**程序顺序是线程的线程间操作实际执行的顺序遵循线程内语意(在单线程程序下线程的行为可以通过读取操作看到的值完全预测)的总排序**
+总结一下，**程序顺序是线程遵循线程内语意执行线程间操作的全序**
 
 ### 顺序一致性(模型)
 第2段这里更是重量级！更是言简意赅凝练到了极致。
-首先翻译一下，**如果所有（线程的线程间）操作发生的总顺序（执行顺序）与程序顺序一致，则这组操作具有顺序一致性**，后面的这段我理解是讲解顺序一致性模型的特点的。
-所以理解这段话我们得首先弄明白什么是顺序一致性模型，当然对于菜鸟的我，还需要再首先一下，什么是内存模型？(memory model)
+首先翻译一下，**如果所有（线程的线程间）操作执行的全序（执行顺序）与（各个线程的）程序顺序一致，则这组操作是顺序一致的**。
+后面的这段我理解是讲解顺序一致性模型的特点的，所以理解这段话我们得首先弄明白什么是顺序一致性模型，当然对于菜鸟的我，还需要再首先一下，什么是内存模型？(memory model)
 
 #### 顺序一致性模型
 来自维基百科 https://en.wikipedia.org/wiki/Sequential_consistency
@@ -166,7 +166,7 @@ JLS 17.4.3
 
 How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs
 ```
-1. 处理器实际执行操作的顺序**有可能**与程序定义的顺序并不相同
+1. 处理器实际执行操作的顺序**有可能**与程序定义的顺序并不相同(~~有可能 == 基本上(不是)~~)
 2. 处理器如果执行结果与程序定义的顺序执行生成的结果相同，那么则称这个处理器具有顺序性(sequential)。
 3. 多核处理器如果任何(实际)执行(顺序)的结果与所有处理器的操作以顺序性(sequential)方式执行相同，并且每个单独处理器的操作以其程序指定的顺序出现，则称这个多核处理器是顺序一致的。
 4. 每个单核具有顺序性并不能保证多核具有顺序一致性
@@ -191,8 +191,8 @@ How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Progr
   |heap memory|
   -------------
 ```
-大致的结构类似这样，最终**通过内存开关连接不同的线程使两个线程的操作具有全局的一个顺序性，也因此具有单个操作的原子性以及每个写操作的结果对后续操作读可见特性。**
-还不够清晰的话，可以**想象现在我们的左右手(每个线程)各有一堆牌(一系列操作)，然后将他们交错互相插入最终形成一堆牌(程序执行两个线程全部操作的总顺序)。**
+大致的结构类似这样，最终**通过内存开关连接不同的线程使两个线程的操作具有全局的一个顺序性(全序)，也因此具有单个操作的原子性以及每个写操作的结果对后续操作读可见特性。**
+还不够清晰的话，可以**想象现在我们的左右手(每个线程)各有一堆牌(一系列操作)，然后将他们交错互相插入最终形成一堆牌(程序执行两个线程全部操作的全序)。**
 举几个例子
 ```markdown
 A1 -> B1 -> A2 -> B2 -> A3 -> B3
@@ -204,8 +204,8 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 总结，**只要每个线程的操作的执行顺序，满足该线程的程序顺序(即执行顺序中该线程的偏序符合1->2->3)且执行效果为原子性并对其他线程立即可见，两个线程任意实际执行顺序都是符合顺序一致性的。**
 
 ##### 程序顺序与执行顺序 (~~F**k八股文~~)
-1. execution order：(程序的)执行顺序，指**程序实际执行操作的顺序，是程序全部操作的总排序**。
-2. program order：(线程的)程序顺序，指**线程符合单线程语义的将被执行的顺序**(在单线程上下文中线程的行为可以完全预测)。非正式的，程序顺序就是我们写代码时的顺序。
+1. execution order：(程序的)执行顺序，指**程序实际执行操作的顺序，是程序全部操作的全序**。
+2. program order：(线程的)程序顺序，指**线程符合单线程语义的将被执行的顺序**。非正式的，**程序顺序就是我们写代码的顺序**。
 
 这里原本是3个顺序，但在论文以及上面的开篇的Tutorial的交叉印证下，我思考了很久才算理清楚程序顺序的含义。
 由于各类优化的存在(重排序/乱序执行等)，实际上execution order与program order并不相同，而现代cpu都是**顺序的**，即只保证单线程下重排序后的执行行为与按照程序顺序执行一致。
@@ -217,8 +217,8 @@ B1 -> B2 -> B3 -> A1 -> A2 -> A3
 3. Sequential consistency and/or freedom from data races still allows errors arising from groups of operations that need to be perceived atomically and are not.
 4. If we were to use sequential consistency as our memory model, many of the compiler and processor optimizations that we have discussed would be illegal.
 ```
-1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的执行顺序的保证。在顺序一致性模型内执行，每个独立的操作都具有原子性而且总执行顺序符合**程序的顺序**，以及每个独立操作具有原子性并对所有线程立即可见。
-2. 总结顺序一致性和Java程序的关系——如果程序没有**数据竞争**，程序的全部操作执行（的效果）**表现的像顺序一致性**。
+1. 总结顺序一致性的特点——顺序一致性(模型)是一个非常强的可见性和程序的执行顺序的保证。**以顺序一致性模型执行(sequentially consistent execution)，存在一个全部独立操作的全序并与程序顺序一致，每个独立操作具有原子性并对所有线程立即可见。**
+2. 总结顺序一致性和Java程序的关系——**如果程序没有数据竞争，程序的全部执行表现为顺序一致性**。
 3. 顺序一致性模型的职责范围——无论是否存在数据竞争，都仍然**允许由一系列操作需要原子性（而实际没有）引发错误**。
 这里根据上面的例子可以很好理解，意思是假设线程的结果必须要求依赖(1->2->3)三个操作为原子执行(中间不能穿插另一个线程的操作)，那么顺序一致性是允许这种情况出现错误。（因为顺序一致性模型并不具有多个操作原子性的保证）。从本质上来看，这种情况下**线程结果的正确性依赖了特定的线程调度顺序（竞态条件），而正如上文所说，对线程的调度不会存在任何约束。**
 4. 补充说明了**JMM并没有采用顺序一致性模型**的原因——许多编译器和处理器的优化将会被认为是非法的。
@@ -304,7 +304,7 @@ It follows from the above definitions that:
 如果你能够通过这组同步边 S 和程序的执行顺序，推导出执行中所有可能的 happens-before 关系（即，没有额外的 happens-before 关系可以被推导出，但未被 S 捕捉），那么我们说这组同步边 S 是充分的（Sufficient）。
 简单来说，在这个上下文中，传递闭包就是通过不断应用 happens-before 的定义，找到所有间接的 happens-before 关系，确保能覆盖程序执行中所有可能的 happens-before 关系。这是确保程序正确同步的一个关键步骤，因为它涵盖了所有必须被同步的操作，以避免数据竞争和其他并发问题。
 ```
-3. 说明了数据竞争的定义——当程序存在两个**冲突访问**且没有通过happens-before关系排序，则称为程序存在数据竞争。
+3. 说明了数据竞争的定义——**当程序存在两个冲突访问且没有通过happens-before关系排序，则称为程序存在数据竞争**。
 4. 解释了数据竞争语义的适用范围——除了线程间操作外的操作的语义，如数组长度的读取、检查型转换的执行和虚方法的调用，并不直接受数据竞争的影响。(**仅适用于线程间操作**)
 ```markdown
 1. A program is correctly synchronized if and only if all sequentially consistent executions are free of data races.
@@ -313,11 +313,9 @@ This is an extremely strong guarantee for programmers. Programmers do not need t
 A program must be correctly synchronized to avoid the kinds of counterintuitive behaviors that can be observed when code is reordered. The use of correct synchronization does not ensure that the overall behavior of a program is correct. However, its use does allow a programmer to reason about the possible behaviors of a program in a simple way; the behavior of a correctly synchronized program is much less dependent on possible reorderings. Without correct synchronization, very strange, confusing and counterintuitive behaviors are possible.
 ```
 这段阐述了程序**正确同步**(correctly synchronized)的定义：
-1. 当且仅当程序所有顺序一致性(方式)执行(的集合)不存在数据竞争，程序是正确同步的。
-2. 如果程序是正确同步的，那么所有的执行(的集合)表现为顺序一致性。
-下面补充说明了这两条规则，简单概括为：
-**只要正确同步的程序就可以忽略重排序，判断是否正确同步就看程序的实际执行顺序能否表现为顺序一致性，但正确同步的程序并不意味着程序的全部行为是正确的(我理解这里的正确指的是符合我们的期望，比如volatile++是正确同步的，但可能不符合我们期望的正确)，使用正确同步允许我们用简单的判断程序的行为，因为正确同步的程序更少的依赖重排序。**
-在层层铺垫后在这里我们终于得到了如何判断程序是否正确同步的方法，以及如何定义正确同步与程序行为正确的关系——正确同步的程序的行为不一定符合我们的期望，但没有正确同步的程序的行为一定会使我们感到困惑和反直觉。
+1. **当且仅当程序所有(以)顺序一致性(方式)执行不存在数据竞争，程序是正确同步的。**
+2. **如果程序是正确同步的，那么程序的所有执行表现为顺序一致性。**
+在层层铺垫后在这里我们终于得到了如何判断程序是否正确同步的方法，以及如何定义正确同步与程序行为正确的关系——**正确同步的程序的行为不一定符合我们的期望(原子性问题)，但没有正确同步的程序的行为一定会使我们感到困惑和反直觉。**
 ```markdown
 1. We say that a read r of a variable v is allowed to observe a write w to v if, in the happens-before partial order of the execution trace:
 - r is not ordered before w (i.e., it is not the case that hb(r, w)), and
@@ -328,18 +326,19 @@ In a happens-before consistent set of actions, each read sees a write that it is
 ```
 ## happens-before consistency
 1. 这段是happens-before的数学化定义，讲解了在某个读请求在什么情况下被允许(is allowed)看到某个写请求(的结果)。
-   1. 在实际总顺序的happens-before偏序中(简单理解为有happens-before关系)，且读请求没有被排在这个写请求后面(即需要满足hb(w,r))
-   2. 这两者之中没有插入另一个写请求w'(即不存在hb(w', r))
-   稍微有点难理解的是这句"Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read."，但我认为也是最快速掌握happens-before实际应用的窍门。
-   这句说的是，如果一个读请求和一个写请求在没有happens-before关系**阻止**的情况下，这个读请求是**被允许**看到这个写请求的结果的。
-   比如上面这个例子，如果这三个操作互相存在happens-before关系，即w -> w' -> r(->是hb关系的符号)，那么很明显r只能看到w'的结果而看不到w的结果(这就意味着happens-before**阻止**了r看到w的结果(的情况))。但在没有相应的hb关系的情况下，那么r看到w的结果是合法的。
-   所以这也给了我们启发，**在判断某个读取可能看到的情况时，可以从happens-before关系阻止(看到哪些情况)的角度反方面快速判断**。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
+   -  按照执行追踪happens-before偏序中
+      1. 读请求没有被排在这个写请求前面(即不存在hb(r,w))
+      2. 这两者之中没有插入另一个写请求w'(即不存在hb(w,w')和hb(w', r))
+      稍微有点难理解的是这句"Informally, a read r is allowed to see the result of a write w if there is no happens-before ordering to prevent that read."，但我认为也是最快速掌握happens-before实际应用的窍门。
+      这句说的是，如果一个读请求和一个写请求在没有happens-before关系**阻止**的情况下，这个读请求是**被允许**看到这个写请求的结果的。
+      比如上面这个例子，如果这三个操作互相存在happens-before关系，即w -> w' -> r(->是hb关系的符号)，那么很明显r只能看到w'的结果而看不到w的结果(这就意味着happens-before**阻止**了r看到w的结果(的情况))。但在没有相应的hb关系的情况下，那么r看到w的结果是合法的。
+      所以这也给了我们启发，**在判断某个读取可能看到的情况时，从存在哪些happens-before关系阻止(看到哪些写请求)的角度进行判断**。因为在很多时候，我们其实并不需要确定某个读请求(在不同执行顺序下)可以看到哪些合法的值，而是期望通过判断(在实际执行中)看到某个值是否合法，进而确认程序的行为是否符合我们的预期(程序正确)。
 2. 第二段是定义什么是happens-before consistent操作集合，其实就是上面两条的数学方式定义全部情况的集合。
    - 操作集合A中如果全部的读r，看到的写W(r)
    - **既不存在**hb(r, W(r))(没有违反hb关系看到未来的写)**也不存在**针对同一个共享变量v的另一个写请求w有hb(W(r), w)和hb(w, r)(没有违反hb关系看到过时的写)
    - 则这个操作集合是happens-before consistent的
 **在happens-before consistent操作集合中，每个读请求都看到它根据happens-before排序被允许看到的写入。**
-需要注意这里集合判断是否符合happens-before consistent是**必须基于有hb关系**。
+需要注意**操作集合判断是否符合happens-before consistent是必须基于有hb关系的**。
 当然jls这里也有个很好的例子，告诉我们什么是happens-before consistent
 ```markdown
  initially A == B == 0 
@@ -369,7 +368,8 @@ In this execution, **the reads see writes that occur later in the execution orde
 发生这种情况，本质的原因是，其实在实际情况下硬件的执行不是(顺序一致的)而是并发的，因此存在后发起的请求先执行完成的情况。
 比如1先发出从主内存读取变量的r2的请求，但是由于某些原因(IO阻塞)，在这等待过程中，后发起的写r2请求先完成了，所以请求1最终读取到了后写入的值。
 还不能理解的话参考上面顺序一致性部分，实现顺序一致性的条件1，关于**发送**的解释，那里的发送是原子性的，这里的发送是非原子性的。
-当然这个是实际发生这种情况的猜测，通过这个例子我认为想表述的是，**只要没有明确的happens-before关系，那么跨线程的读取看到任何写操作都是合法的，这个操作集合就是happens-before consistency的**。
+当然这个是实际发生这种情况的猜测，不过这不重要。
+通过这个例子我认为想表述的是，**只要没有明确的happens-before关系，那么跨线程的读取看到任何写操作都是合法的，这个操作集合就是happens-before consistency的**。
 结合jls学术性的看这个例子，推理逻辑大概是这样：
 1. 整体背景：程序每个线程必须符合单线程语义
 2. 程序顺序：线程的程序顺序是该线程全部线程间操作基于单线程语义将被执行的顺序
@@ -453,8 +453,8 @@ Obviously, some actions may be committed early and some may not. If, for example
 我认为这个例子就是JMM规则的综合应用，建议细品。
 这个例子有几个注意点：
 1. 核心结论：**Happens-before consistency is a necessary, but not sufficient, set of constraints. Merely enforcing happens-before consistency would allow for unacceptable behaviors - those that violate the requirements we have established for programs. For example, happens-before consistency allows values to appear "out of thin air".**
-2. 程序是正确同步的，原因是以顺序一致性的方式执行不存在写操作，没有数据冲突。
-3. 但这个例子不符合上文的第二条，正确同步的程序应该只表现为顺序一致性，而程序存在下面的情况，是不符合顺序一致性的。(there is an execution of this program **that is happens-before consistent, but not sequentially consistent**)
+2. 程序是正确同步的，原因是以顺序一致性的方式执行不存在写操作，所以没有数据冲突。
+3. 但这个例子没有遵循正确同步程序的第二条，正确同步的程序应该只表现为顺序一致性。(there is an execution of this program **that is happens-before consistent, but not sequentially consistent**)
 4. This result is happens-before consistent: **there is no happens-before relationship that prevents it from occurring.** However, it is clearly not acceptable: there is no sequentially consistent execution that would result in this behavior. The fact that we allow a read to see a write that comes later in the execution order can sometimes thus result in unacceptable behaviors.
 5. bearing in mind that **if a read sees a write that occurs later in the execution, it represents the fact that the write is actually performed early**
 6. The memory model takes as input a given execution, and a program, and determines whether that execution is a legal execution of the program. It does this by gradually building a set of "committed" actions that reflect which actions were executed by the program. Usually, the next action to be committed will reflect the next action that can be performed by a sequentially consistent execution. However, to reflect reads that need to see later writes, we allow some actions to be committed earlier than other actions that happen-before them.
@@ -463,6 +463,7 @@ Obviously, some actions may be committed early and some may not. If, for example
    **Happens-before consistency + causality requirements**
 
 # Observable Behavior and Nonterminating Executions
+jls 17.4.9
 ```markdown
 For programs that always terminate in some bounded finite period of time, their behavior can be understood (informally) simply in terms of their allowable executions. For programs that can fail to terminate in a bounded amount of time, more subtle issues arise.
 The observable behavior of a program is defined by the finite sets of external actions that the program may perform. A program that, for example, simply prints "Hello" forever is described by a set of behaviors that for any non-negative integer i, includes the behavior of printing "Hello" i times.
@@ -471,5 +472,19 @@ We also define a special hang action. If behavior is described by a set of exter
 A thread can be blocked in a variety of circumstances, such as when it is attempting to acquire a lock or perform an external action (such as a read) that depends on external data.
 An execution may result in a thread being blocked indefinitely and the execution's not terminating. In such cases, the actions generated by the blocked thread must consist of all actions generated by that thread up to and including the action that caused the thread to be blocked, and no actions that would be generated by the thread after that action.
 ```
+这篇定义程序可观测的行为，以及在程序永不终止的执行下，程序的行为如何定义。
+1. 程序的行为表现为程序**可能执行外部调用**的有限集合
+2. 程序终止(Termination)和挂起(hang)并没有被明确定义为行为，我们可以把这两者定义为一种外部调用。
+3. 程序挂起后可以运行无限长的时间而没有任何外部调用或者终止
+4. 一次执行可能会导致线程无限期地阻塞并且执行不会终止。 在这种情况下，被阻止的线程生成的操作必须包含该线程生成的所有操作（包括导致线程被阻止的操作），并且在该操作之后线程不会生成任何操作。
+
+# 思考与总结
+
+1. 为什么需要内存模型：理解并发核心点在于理解“偏序”和“全序”，全序是最符合直觉的(所以定义了顺序一致性)，但真实世界里其实是无序的，因此需要定义不同的内存模型(契约)，约束程序的行为，在语言角度，这个契约就是JMM。
+2. 并发与并行：并发与并行，区别点在于并发强调的是时间点的概念，而并行强调的是时间段。计算机世界，我们应该忘记传统时间这个概念，改为理解并接受并发。
+3. 为什么有hb和po：program order构建一套单线程偏序顺序，但多线程环境下并非是全序，所以还需要happens-before规则(当然其实还有因果依赖)，目标使多线程交互形成全序。
+4. 如何运用happens-before：不再采用直觉(传统时间观)判断能否看到某个写，而改为是否存在相应的happens-before规则阻止看到某个写
+5. 正确同步：在此之上，我们比较容易理解程序正确同步的含义，没有数据竞争后，相当于整体的操作指令是全序的，程序表现为顺序一致性。
+6. 并发问题的本质：归根结底为可见性及原子性，上面说的全部规则解决的是可见性问题，而原子性的问题，也是语言角度无法解决的，而这部分需要程序员们对并发有理解后才能正确判断。
 
 
