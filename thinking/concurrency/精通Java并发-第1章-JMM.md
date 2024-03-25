@@ -230,7 +230,7 @@ Every execution has a synchronization order.
 A synchronization order is a total order over all of the synchronization actions of an execution. 
 For each thread t, the synchronization order of the synchronization actions (§17.4.2) in t is consistent with the program order (§17.4.3) of t.
 ```
-这段说明了什么是同步顺序——同步顺序是程序(某次实际)执行的全部**同步操作**的总排序。不过最重要的是最后一句，针对每个线程，**线程的同步顺序与程序顺序一致**。
+这段说明了什么是同步顺序——同步顺序是程序(某次实际)执行的全部**同步操作**的全序。不过最重要的是最后一句，针对每个线程，**线程的同步顺序与程序顺序一致**。
 ```markdown
 - Synchronization actions induce the synchronized-with relation on actions, defined as follows:
 1. An unlock action on monitor m synchronizes-with all subsequent lock actions on m (where "subsequent" is defined according to the synchronization order).
