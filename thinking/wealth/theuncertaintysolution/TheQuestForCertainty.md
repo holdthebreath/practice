@@ -17,3 +17,15 @@
      - An opinion, a belief, an attitude is perceived as “correct,” “valid,” and “proper” to the extent that it is anchored in a group of people with similar beliefs, opinions, and attitudes. Individuals’ understandings of the world are held as true to the extent that they can be affirmed by some social group.
      - we attempt to reduce uncertainty and protect ourselves from its discomfort by associating with others who agree with and validate our attitudes and values.
      - rather than seeking that kind of spurious comfort, you’d be better served by being open to thoughts beyond your current groups.
+7. LETTING IT BE
+   - SIT IN YOUR DISCOMFORT
+     - Sitting in discomfort is a good strategy for painful emotions; it’s also an essential behavior to practice in the face of uncertainty
+     - Face, Accept, Float, Let Time Pass
+       - Face that you are experiencing uncertainty that’s causing stress and anxiety. Acknowledge the discomfort and don’t run from it.
+       - Accept the situation and that the uncertainty can’t be immediately resolved.
+       - Let your feelings of stress, anxiety, and fear float by—observe your emotions but stay above them.
+       - Let Time Pass without impatience, fear, or anger. Let things play out.
+     - when in doubt, do nothing.
+     - When you feel compelled to act on your portfolio, go for a walk. Read a good book. Start a home project. Try not to look at your portfolio. I know that the more I look at my portfolio, the more I’m apt to tinker. Tinkering seldom works out well.
+   - FOCUS ON WHAT YOU CAN CONTROL
+     - When you feel the stress of uncertainty, ask yourself if it’s because you aren’t in control
