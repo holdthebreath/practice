@@ -1,0 +1,5 @@
+- BECOMING WARY OF ATTRIBUTING CAUSATION TO CIRCUMSTANCE IS A MENTAL MODEL ESSENTIAL TO MAKING GOOD DECISIONS, BOTH IN THE INVESTMENT REALM AND THE REAL WORLD.
+  - Decisions based on faulty explanation or imaginary causation are like coin flips (or worse). Consequently, knowing how to sniff out when causation exists and when it doesn’t is critical . . . unless flipping a coin is your go-to decision-making model.
+- THE CHICKEN AND THE EGG: THE DIFFICULTY IN DETERMINING CAUSATION
+  - CONFUSING SYMPTOMS WITH CAUSES：We need to be careful not to ascribe causation when we think we see a pattern. Just because two variables are correlated doesn’t mean that one variable caused the other.“it’s possible that what you thought was a cause might instead be a symptom.
+  - 
