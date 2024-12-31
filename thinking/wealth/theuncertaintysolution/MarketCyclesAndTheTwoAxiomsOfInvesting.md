@@ -32,5 +32,30 @@
 
 - WHY SHOULDN’T WE TRY TO TIME THE MARKET?
 
-1. they followed a **discipline** whereby their preset allocations dictated their buys and sells.
-2. 
+1. If high-priced global macro hedge funds can’t market time successfully, what are the chances that you (or your broker) are going to make profitable tweaks to your portfolio?
+2. they followed a **discipline** whereby their preset allocations dictated their buys and sells.
+
+- BEING RIGHT ONCE IS HARD. BEING RIGHT TWICE IS HARDER
+
+1. Another major problem with timing the stock market is that you must be right twice to be successful once.
+
+- IT’S OKAY TO INVEST (OR STAY INVESTED) IN ADVANCE OF A BEAR MARKET
+
+1. History has shown that investing in advance of a bear market (or remaining invested) is not as bad as you might think, and sometimes it turns out great. Unless you call market tops and bottoms correctly, which (as you’ve been reading so far) is nearly impossible, you’re better off investing in advance of a bear market (assuming you’re investing in a diversified and disciplined manner) rather than trying to time the markets.
+
+- THE MARKET CAN STAY IRRATIONAL LONGER THAN YOU CAN STAY SOLVENT
+
+1. Being correct too early is indistinguishable from being wrong.
+2. Being correct too early is indistinguishable from being wrong.(过犹不及)
+
+- THE MENTAL MODELS AND HOW TO APPLY THEM
+
+1. Markets move in cycles. Boom followed by bust followed by boom. Cycles vary in duration as well as the height of their peaks and the depth of their valleys, but there are no permanent plateaus.
+2. Knowing roughly where we are in the market cycle can help you practice good investment behavior by not getting caught up in the greed of market tops or the panic that accompanies market bottoms.
+3. Economic stability creates instability. Times of apparent stability are the riskiest; the best opportunities often occur when everyone else is going cuckoo.
+4. Market timing doesn’t work. There are no established indicators that signal to investors that the market is about to turn. Plus, successful market timing requires being right twice (knowing when to get out and then back in), which is extremely difficult.
+5. **Waiting to invest until the coast is clear is not a sound strategy. Even if you invest just a few years in advance of a bear market, your portfolio will likely do fine if you don’t panic and if you follow a disciplined strategy.**
+6. **Being “right” doesn’t mean you win because the market can stay “wrong” for a long time. Being right at the right time is what matters.**
+
+
+While the market indisputably moves in cycles, it’s impossible to consistently time market cycles profitably. Understanding these two opposing axioms of investing gives you the freedom to shut out most of the market’s noise and focus on your behavior. Instead of trying to guess what the economy or stock market is going to do, resist the greed—or irrational enthusiasm—that accompanies booms, as well as the panic that comes with busts. Keep calm, carry on, and avoid the urge to tinker with your portfolio.
