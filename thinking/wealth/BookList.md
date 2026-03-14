@@ -8,3 +8,6 @@
   1. 《金钱心理学》
   2. 《The Uncertainty Solution: How to Invest with Confidence in the Face of the Unknown》
   3. 《有钱人和你想的不一样》
+  4. 《纳瓦尔宝典》
+  5. 《The Art of Spending Money: Simple Choices for a Richer Life》
+  6. 《die with zero》
