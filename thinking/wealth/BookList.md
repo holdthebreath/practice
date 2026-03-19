@@ -1,6 +1,8 @@
 - 顶层设计
   1. 工作伦理：《工作，消费主义和新穷人》
   2. 教育/工作/养老系统：《Early Retirement Extreme: A Philosophical and Practical Guide to Financial Independence》
+  3. 现代社会伦理：《非对称风险》
+  4. 拥抱随机性：《反脆弱》《黑天鹅》
 - 金钱影响
   1. 《稀缺：我们是如何陷入贫穷与忙碌的》
   2. 《贫穷的本质:我们为什么摆脱不了贫穷》
