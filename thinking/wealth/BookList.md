@@ -3,6 +3,7 @@
   2. 教育/工作/养老系统：《Early Retirement Extreme: A Philosophical and Practical Guide to Financial Independence》
   3. 现代社会伦理：《非对称风险》
   4. 拥抱随机性：《反脆弱》《黑天鹅》
+  5. 黑客视角：《黑客与画家》
 - 金钱影响
   1. 《稀缺：我们是如何陷入贫穷与忙碌的》
   2. 《贫穷的本质:我们为什么摆脱不了贫穷》
